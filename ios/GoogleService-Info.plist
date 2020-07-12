@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>75910534720-s4sdi8nm8mpova132noe2i1098skfs8m.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.75910534720-s4sdi8nm8mpova132noe2i1098skfs8m</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>75910534720-dvmdhf6v954a7raq1gb9pmk4oc9op0vd.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBnYscvtKUQfafz9QncSda2xoK2Q0Oq8bc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>75910534720</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.arunlakhera.beenaSocialApp</string>
+	<key>PROJECT_ID</key>
+	<string>beena-social-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>beena-social-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:75910534720:ios:8cee367da58cca42a7b1a5</string>
+	<key>DATABASE_URL</key>
+	<string>https://beena-social-app.firebaseio.com</string>
+</dict>
+</plist>

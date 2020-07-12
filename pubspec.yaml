@@ -1,0 +1,45 @@
+name: beena_social_app
+description: A new Flutter application.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.3
+  cloud_firestore: ^0.13.7
+  image: ^2.1.14
+  animator: ^2.0.1
+  image_picker: ^0.6.7+4
+  google_sign_in: ^4.5.1
+  timeago: ^2.0.26
+  cached_network_image: ^2.2.0+1
+  firebase_auth: ^0.16.1
+  geolocator: ^5.3.2+2
+  uuid: ^2.2.0
+  path_provider: ^1.6.11
+  firebase_messaging: ^6.0.16
+  firebase_storage: ^3.1.6
+  flutter_auth_buttons: ^0.8.0
+  font_awesome_flutter: ^8.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Signatra
+      fonts:
+        - asset: assets/fonts/Signatra.ttf
+assets:
+  - assets/images/
+
