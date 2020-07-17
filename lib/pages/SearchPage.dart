@@ -1,6 +1,7 @@
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
+import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,7 +79,7 @@ class _SearchPageState extends State<SearchPage>
   }
 
   displayNoSearchResultScreen() {
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    //final Orientation orientation = MediaQuery.of(context).orientation;
     return Center(
       child: Container(
         child: ListView(
@@ -143,7 +144,10 @@ class UserResult extends StatelessWidget {
         child: Column(
           children: [
             GestureDetector(
-              onTap: () => print('Tapped'),
+              onTap: () => displayUserProfile(
+                context,
+                userProfileId: eachUser.id,
+              ),
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: colorBlack,
@@ -170,5 +174,12 @@ class UserResult extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  displayUserProfile(BuildContext context, {String userProfileId}) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfilePage(userProfileId: userProfileId)));
   }
 }
