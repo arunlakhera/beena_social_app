@@ -3,6 +3,8 @@ import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  //Firestore.instance.settings();
   runApp(MyApp());
 }
 

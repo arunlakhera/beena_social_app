@@ -4,6 +4,7 @@ import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/CommentsPage.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
+import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -122,7 +123,7 @@ class _PostState extends State<Post> {
             backgroundColor: colorGrey,
           ),
           title: GestureDetector(
-            onTap: () => print('Show Profile'),
+            onTap: () => displayUserProfile(context, userProfileId: user.id),
             child: Text(
               user.username,
               style: TextStyle(color: colorWhite, fontWeight: FontWeight.bold),
@@ -141,6 +142,13 @@ class _PostState extends State<Post> {
         );
       },
     );
+  }
+
+  displayUserProfile(BuildContext context, {String userProfileId}) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfilePage(userProfileId: userProfileId)));
   }
 
   createPostPicture() {
@@ -291,7 +299,7 @@ class _PostState extends State<Post> {
         'type': 'like',
         'username': currentUser.username,
         'userId': currentUser.id,
-        'timestamp': timeStamp,
+        'timestamp': DateTime.now(),
         'url': url,
         'postId': postId,
         'userProfileImg': currentUser.url

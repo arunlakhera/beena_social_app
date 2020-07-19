@@ -384,7 +384,11 @@ class _ProfilePageState extends State<ProfilePage> {
         .collection('userFollowers')
         .getDocuments();
     setState(() {
-      countTotalFollowers = querySnapshot.documents.length;
+      if (querySnapshot.documents.length > 0) {
+        countTotalFollowers = querySnapshot.documents.length - 1;
+      } else {
+        countTotalFollowers = 0;
+      }
     });
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/CreateAccountPage.dart';
@@ -7,6 +9,7 @@ import 'package:beena_social_app/pages/SearchPage.dart';
 import 'package:beena_social_app/pages/TimeLinePage.dart';
 import 'package:beena_social_app/pages/UploadPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +25,7 @@ final activityFeedReference = Firestore.instance.collection('feed');
 final commentsReference = Firestore.instance.collection('comments');
 final followersReference = Firestore.instance.collection('followers');
 final followingReference = Firestore.instance.collection('following');
+final timelineReference = Firestore.instance.collection('timeline');
 
 final DateTime timeStamp = DateTime.now();
 User currentUser;
@@ -32,10 +36,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isSignedIn = false;
 
   PageController pageController;
   int getPageIndex = 0;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   void initState() {
@@ -73,14 +79,11 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildHomeScreen() {
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         child: PageView(
           children: [
-            TimeLinePage(),
-//            RaisedButton.icon(
-//                onPressed: googleLogoutUser,
-//                icon: Icon(Icons.close),
-//                label: Text('Sign Out')),
+            TimeLinePage(googleCurrentUser: currentUser),
             SearchPage(),
             UploadPage(googleCurrentUser: currentUser),
             NotificationsPage(),
@@ -202,6 +205,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isSignedIn = true;
       });
+
+      configureRealTimePushNotifications();
     } else {
       setState(() {
         isSignedIn = false;
@@ -249,9 +254,58 @@ class _HomePageState extends State<HomePage> {
         'bio': '',
         'timestamp': timeStamp,
       });
+
+      await followersReference
+          .document(googleCurrentUser.id)
+          .collection('userFollowers')
+          .document(googleCurrentUser.id)
+          .setData({});
+
       documentSnapshot =
           await usersReference.document(googleCurrentUser.id).get();
     }
     currentUser = User.fromDocument(documentSnapshot);
+  }
+
+  configureRealTimePushNotifications() {
+    final GoogleSignInAccount googleUser = googleSignIn.currentUser;
+
+    if (Platform.isIOS) {
+      getIOSPermissions();
+    }
+
+    _firebaseMessaging.getToken().then((token) {
+      usersReference
+          .document(googleUser.id)
+          .updateData({'androidNotificationToken': token});
+    });
+
+    _firebaseMessaging.configure(onMessage: (Map<String, dynamic> msg) async {
+      final String recipientId = msg['data']['recipient'];
+      final String body = msg['notification']['body'];
+
+      if (recipientId == googleUser.id) {
+        SnackBar snackBar = SnackBar(
+          backgroundColor: Colors.grey,
+          content: Text(
+            body,
+            style: TextStyle(
+              color: colorBlack,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+        _scaffoldKey.currentState.showSnackBar(snackBar);
+      }
+    });
+  }
+
+  getIOSPermissions() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(alert: true, badge: true, sound: true));
+
+    _firebaseMessaging.onIosSettingsRegistered.listen((settings) {
+      print('settings registered: $settings');
+    });
   }
 }

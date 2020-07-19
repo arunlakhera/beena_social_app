@@ -95,7 +95,7 @@ class _CommentsPageState extends State<CommentsPage> {
     commentsReference.document(postId).collection('comments').add({
       'username': currentUser.username,
       'comment': commentsTextEditingController.text,
-      'timestamp': timeStamp,
+      'timestamp': DateTime.now(),
       'url': currentUser.url,
       'userId': currentUser.id,
     });
@@ -103,12 +103,13 @@ class _CommentsPageState extends State<CommentsPage> {
     if (isNotPostOwner) {
       activityFeedReference.document(postOwnerId).collection('feedItems').add({
         'type': 'comment',
-        'commentDate': DateTime.now(),
+        'commentData': commentsTextEditingController.text,
         'postId': postId,
         'userId': currentUser.id,
         'username': currentUser.username,
         'userProfileImg': currentUser.url,
         'url': postImageUrl,
+        'timestamp': timeStamp,
       });
     }
     commentsTextEditingController.clear();

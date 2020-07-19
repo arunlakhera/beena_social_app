@@ -270,7 +270,7 @@ class _UploadPageState extends State<UploadPage>
         .placemarkFromCoordinates(position.latitude, position.longitude);
     Placemark placemark = placeMarks[0];
     //String completeAddressInfo =
-      //  '${placemark.subThoroughfare} ${placemark.thoroughfare},${placemark.subLocality} ${placemark.locality},${placemark.subAdministrativeArea} ${placemark.administrativeArea},${placemark.postalCode} ${placemark.country}';
+    //  '${placemark.subThoroughfare} ${placemark.thoroughfare},${placemark.subLocality} ${placemark.locality},${placemark.subAdministrativeArea} ${placemark.administrativeArea},${placemark.postalCode} ${placemark.country}';
     String specificAddress = '${placemark.locality}, ${placemark.country}';
     locationTextEditingController.text = specificAddress;
   }
@@ -324,7 +324,7 @@ class _UploadPageState extends State<UploadPage>
         .setData({
       'postId': postId,
       'ownerId': widget.googleCurrentUser.id,
-      'timestamp': timeStamp,
+      'timestamp': DateTime.now(),
       'likes': {},
       'username': widget.googleCurrentUser.username,
       'description': description,
