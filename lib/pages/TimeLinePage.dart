@@ -1,4 +1,3 @@
-
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
