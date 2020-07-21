@@ -5,6 +5,7 @@ import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String currentOnlineUserId;
@@ -52,49 +53,54 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ? circularProgress()
             : ListView(
                 children: [
-                  Container(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 16, bottom: 7),
-                          child: CircleAvatar(
-                            radius: 52,
-                            backgroundImage:
-                                CachedNetworkImageProvider(user.url),
+                  Card(
+                    elevation: 2,
+                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    child: Container(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(top: 16, bottom: 7),
+                            child: CircleAvatar(
+                              radius: 52,
+                              backgroundImage:
+                                  CachedNetworkImageProvider(user.url),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              createProfileNameTextFormField(),
-                              createBioTextFormField(),
-                            ],
+                          SizedBox(height: 20),
+                          Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                createProfileNameTextFormField(),
+                                SizedBox(height: 20),
+                                createBioTextFormField(),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        RaisedButton(
-                          color: colorWhite,
-                          onPressed: updateUserData,
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 40),
-                          child: Text(
-                            'Update',
-                            style: TextStyle(color: colorBlack, fontSize: 16),
+                          SizedBox(height: 20),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                FloatingActionButton(
+                                  heroTag: 'logout_btn',
+                                  onPressed: logoutUser,
+                                  child: Icon(Icons.exit_to_app,
+                                      color: Colors.red),
+                                ),
+                                FloatingActionButton(
+                                  heroTag: 'save_btn',
+                                  onPressed: updateUserData,
+                                  child: Icon(Icons.save),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        RaisedButton(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 40),
-                          color: Colors.red,
-                          onPressed: logoutUser,
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(color: colorWhite, fontSize: 14),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -111,11 +117,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
           padding: EdgeInsets.only(top: 13),
           child: Text(
             'Profile Name',
-            style: TextStyle(color: colorGrey),
+            style: TextStyle(color: Colors.grey.shade700),
           ),
         ),
         TextField(
-          style: TextStyle(color: colorWhite),
+          style: TextStyle(color: colorBlack),
           controller: profileNameTextEditingController,
           decoration: InputDecoration(
               hintText: 'Write Profile Name...',
@@ -123,7 +129,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 borderSide: BorderSide(color: colorGrey),
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: colorWhite),
+                borderSide: BorderSide(color: colorGrey),
               ),
               hintStyle: TextStyle(color: colorGrey),
               errorText:
@@ -133,27 +139,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Column createBioTextFormField() {
+  Widget createBioTextFormField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 13),
+          padding: EdgeInsets.only(top: 5),
           child: Text(
             'Bio',
-            style: TextStyle(color: colorGrey),
+            style: TextStyle(color: Colors.grey.shade700),
           ),
         ),
         TextField(
-          style: TextStyle(color: colorWhite),
+          style: TextStyle(
+            color: colorBlack,
+            fontFamily: 'Quicksand',
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
           controller: bioTextEditingController,
+          maxLines: null,
           decoration: InputDecoration(
               hintText: 'Write Bio here...',
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: colorGrey),
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: colorWhite),
+                borderSide: BorderSide(color: colorGrey),
               ),
               hintStyle: TextStyle(color: colorGrey),
               errorText: _bioValid ? null : 'Bio is very long.'),

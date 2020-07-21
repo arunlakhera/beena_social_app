@@ -207,7 +207,7 @@ class _PostState extends State<Post> {
   createPostFooter() {
     return Container(
       color: colorBlack,
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      padding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -225,7 +225,6 @@ class _PostState extends State<Post> {
                         color: Colors.pink,
                       ),
                     ),
-                    SizedBox(width: 5),
                     Text(
                       '$likeCount likes',
                       style: TextStyle(
@@ -249,7 +248,6 @@ class _PostState extends State<Post> {
                         color: Colors.pink,
                       ),
                     ),
-                    SizedBox(width: 5),
                     Text(
                       '$commentCount comments',
                       style: TextStyle(
@@ -261,41 +259,6 @@ class _PostState extends State<Post> {
                   ],
                 ),
               ),
-
-//              FlatButton.icon(
-//                color: colorWhite,
-//                onPressed: () => controlUserLikePost(),
-//                icon: Icon(
-//                  isLiked ? Icons.favorite : Icons.favorite_border,
-//                  size: 30,
-//                  color: Colors.pink,
-//                ),
-//                label: Text(
-//                  '$likeCount likes',
-//                  style: TextStyle(
-//                    color: colorWhite,
-//                    fontWeight: FontWeight.bold,
-//                    fontFamily: 'Quicksand',
-//                  ),
-//                ),
-//              ),
-//              FlatButton.icon(
-//                onPressed: () => displayComments(context,
-//                    postId: postId, ownerId: ownerId, url: url),
-//                icon: Icon(
-//                  Icons.chat_bubble_outline,
-//                  size: 30,
-//                  color: Colors.pink,
-//                ),
-//                label: Text(
-//                  '$commentCount comments',
-//                  style: TextStyle(
-//                    color: colorWhite,
-//                    fontWeight: FontWeight.bold,
-//                    fontFamily: 'Quicksand',
-//                  ),
-//                ),
-//              ),
             ],
           ),
           SizedBox(height: 5),
@@ -303,28 +266,33 @@ class _PostState extends State<Post> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text:
-                            description.trim().length > 1 ? '$username : ' : '',
-                        style: TextStyle(
-                          color: colorOffWhite,
-                          fontSize: 16,
-                          fontFamily: 'Quicksand',
+                child: Container(
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: description.trim().length > 1
+                              ? '$username : '
+                              : '',
+                          style: TextStyle(
+                            color: colorOffWhite,
+                            fontSize: 16,
+                            fontFamily: 'Quicksand',
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: description.trim().length > 1 ? description : '',
-                        style: TextStyle(
-                          color: colorWhite,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                          fontFamily: 'Quicksand',
-                        ),
-                      )
-                    ],
+                        TextSpan(
+                          text:
+                              description.trim().length > 1 ? description : '',
+                          style: TextStyle(
+                            color: colorWhite,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            fontFamily: 'Quicksand',
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

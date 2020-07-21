@@ -10,6 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -33,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   var totalPosts = 0;
   var totalFollowers = 0;
   var totalFollowing = 0;
+  bool ownProfile = false;
 
   @override
   void initState() {
@@ -50,10 +52,11 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: ListView(
           children: [
-            Card(
-              color: Colors.white.withOpacity(0.95),
-              child: createProfileTopView(),
-            ),
+//            Card(
+//              color: Colors.white.withOpacity(0.95),
+//              child: createProfileTopView(),
+//            ),
+            createProfileTopView(),
             Divider(),
             createListAndGridPostOrientation(),
             Divider(),
@@ -65,6 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createProfileTopView() {
+    ownProfile = (currentOnlineUserId == widget.userProfileId);
     return FutureBuilder(
       future: usersReference.document(widget.userProfileId).get(),
       builder: (context, dataSnapshot) {
@@ -74,108 +78,108 @@ class _ProfilePageState extends State<ProfilePage> {
 
         User user = User.fromDocument(dataSnapshot.data);
 
-        return Padding(
-          padding: EdgeInsets.all(15),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: colorWhite,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundImage: CachedNetworkImageProvider(user.url),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(top: 5),
-                child: Text(
-                  user.profileName.toUpperCase(),
-                  style: TextStyle(
-                    color: colorBlack,
-                    fontSize: 18,
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(top: 5),
-                child: Text(
-                  user.username,
-                  style: TextStyle(
-                    color: colorBlack,
-                    fontSize: 16,
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 5,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: colorBlack,
-                ),
-                child: Container(
-                  padding: EdgeInsets.only(left: 20, right: 20),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          createColumns(title: 'Posts', count: countPost),
-                          createColumns(
-                              title: 'Followers', count: countTotalFollowers),
-                          createColumns(
-                              title: 'Following', count: countTotalFollowings),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              user.bio.trim().length > 1
-                  ? Container(
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(top: 3),
-                      child: Text(
-                        user.bio,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Quicksand',
+        return Column(
+          children: [
+            Card(
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: colorWhite,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Image(
+                              image: CachedNetworkImageProvider(user.url)),
                         ),
-                      ),
-                    )
-                  : Text(''),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  createButton(),
-                ],
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.profileName.toUpperCase(),
+                                style: TextStyle(
+                                  color: colorBlack,
+                                  fontSize: 18,
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                user.username,
+                                style: TextStyle(
+                                  color: colorBlack,
+                                  fontSize: 15,
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ownProfile
+                            ? IconButton(
+                                onPressed: () => editUserProfile(),
+                                icon: FaIcon(FontAwesomeIcons.edit),
+                              )
+                            : Text(''),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    user.bio.trim().length > 1
+                        ? Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(top: 3),
+                            child: Text(
+                              user.bio,
+                              style: TextStyle(
+                                color: colorBlack,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Quicksand',
+                              ),
+                            ),
+                          )
+                        : Text(''),
+                    SizedBox(height: 10),
+                    ownProfile
+                        ? Text('')
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              createButton(),
+                            ],
+                          ),
+                    SizedBox(height: 10),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+            Card(
+//              color: Colors.grey.shade800,
+              color: Colors.white,
+              child: Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    createColumns(title: 'Posts', count: countPost),
+                    createColumns(
+                        title: 'Followers', count: countTotalFollowers),
+                    createColumns(
+                        title: 'Following', count: countTotalFollowings),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -190,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
           NumberFormat.compact().format(count).toString(),
           style: TextStyle(
               fontSize: 20,
-              color: colorWhite,
+              color: colorBlack,
               fontWeight: FontWeight.bold,
               fontFamily: 'Quicksand'),
         ),
@@ -211,20 +215,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createButton() {
-    bool ownProfile = (currentOnlineUserId == widget.userProfileId);
-    if (ownProfile) {
-      return createButtonTitleAndFunction(
-          title: 'Edit Profile', performFunction: editUserProfile);
-    } else if (following) {
+    ownProfile = (currentOnlineUserId == widget.userProfileId);
+    if (following && !ownProfile) {
       return createButtonTitleAndFunction(
         title: 'Unfollow',
         performFunction: controlUnfollowUser,
       );
-    } else if (!following) {
+    } else if (!following && !ownProfile) {
       return createButtonTitleAndFunction(
         title: 'Follow',
         performFunction: controlFollowUser,
       );
+    } else {
+      return Text('');
     }
   }
 

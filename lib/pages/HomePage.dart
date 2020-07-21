@@ -35,16 +35,13 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isSignedIn = false;
 
   PageController pageController;
   int getPageIndex = 0;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  AnimationController controller;
-  Animation animation;
 
   @override
   void initState() {
@@ -63,30 +60,10 @@ class _HomePageState extends State<HomePage>
         .catchError((googleError) {
       print('Error Message: $googleError');
     });
-
-    // Animation
-    controller = AnimationController(
-        duration: Duration(seconds: 2), vsync: this, lowerBound: 0.5);
-    animation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
-    controller.forward();
-
-    controller.addStatusListener((status) {
-      setState(() {
-        if (status == AnimationStatus.completed) {
-          controller.reverse(from: 1.0);
-        } else if (status == AnimationStatus.dismissed) {
-          controller.forward();
-        }
-      });
-    });
-    controller.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   void dispose() {
-    controller.dispose();
     pageController.dispose();
     super.dispose();
   }
@@ -126,11 +103,7 @@ class _HomePageState extends State<HomePage>
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home)),
           BottomNavigationBarItem(icon: Icon(Icons.search)),
-          BottomNavigationBarItem(
-              icon: Icon(
-            Icons.photo_camera,
-            size: 37,
-          )),
+          BottomNavigationBarItem(icon: Icon(Icons.photo_camera, size: 35)),
           BottomNavigationBarItem(icon: Icon(Icons.favorite)),
           BottomNavigationBarItem(icon: Icon(Icons.person)),
         ],
@@ -147,10 +120,11 @@ class _HomePageState extends State<HomePage>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.black54,
-                Colors.grey.shade800,
+                Colors.black,
+                Colors.black,
+                Colors.deepPurple.withOpacity(0.2),
               ],
-              begin: Alignment.topLeft,
+              begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
@@ -163,16 +137,16 @@ class _HomePageState extends State<HomePage>
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      //color: Colors.grey.shade300,
-                      color: Colors.grey.shade800,
+                      color: Colors.grey.shade900.withOpacity(0.1),
+                      //color: Colors.black.withOpacity(0.8),
                       boxShadow: [
                         BoxShadow(
-                          offset: Offset(10, 10),
+                          offset: Offset(5, 5),
                           color: Colors.black38,
                           blurRadius: 40,
                         ),
                         BoxShadow(
-                          offset: Offset(-10, -10),
+                          offset: Offset(-5, -5),
 //                      color: Colors.white.withOpacity(0.85),
                           color: Colors.white.withOpacity(0.2),
                           blurRadius: 40,
@@ -184,6 +158,9 @@ class _HomePageState extends State<HomePage>
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 40,
+                        fontFamily: 'Signatra',
+                        letterSpacing: 2,
+                        wordSpacing: 2,
                         shadows: [
                           Shadow(
                               offset: Offset(3, 3),
@@ -200,62 +177,23 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
               ),
-              SizedBox(height: 50),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  InkWell(
-                    onTap: () => googleLoginUser(),
-                    child: Hero(
-                      tag: 'heart_black_1',
-                      child: Transform.rotate(
-                        angle: 0.0,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: animation.value * 20,
-                              vertical: animation.value * 10),
-                          margin: EdgeInsets.only(bottom: 30),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.deepOrange,
-                          ),
-                          child: FaIcon(
-                            FontAwesomeIcons.google,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
+                  Container(
+                    child: RaisedButton.icon(
+                      onPressed: () => googleLoginUser(),
+                      icon: FaIcon(
+                        FontAwesomeIcons.google,
+                        color: Colors.red.shade900,
+                        size: 25,
                       ),
+                      label: Text('Sign In with Google'),
                     ),
                   ),
-                  SizedBox(width: 10),
-//                  Hero(
-//                    tag: 'heart_black_1',
-//                    child: Transform.rotate(
-//                      angle: 0.0,
-//                      child: Container(
-//                        alignment: Alignment.center,
-//                        padding: EdgeInsets.symmetric(
-//                            horizontal: animation.value * 20,
-//                            vertical: animation.value * 10),
-//                        margin: EdgeInsets.only(bottom: 30),
-//                        decoration: BoxDecoration(
-//                          borderRadius: BorderRadius.circular(10),
-//                          color: Colors.blueAccent,
-//                        ),
-//                        child: InkWell(
-//                          onTap: () => googleLoginUser(),
-//                          child: FaIcon(
-//                            FontAwesomeIcons.facebookSquare,
-//                            color: Colors.white,
-//                            size: 30,
-//                          ),
-//                        ),
-//                      ),
-//                    ),
-//                  ),
                 ],
               ),
+              SizedBox(height: 20),
             ],
           ),
         ),
