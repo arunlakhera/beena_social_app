@@ -9,6 +9,8 @@ import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userProfileId;
@@ -28,6 +30,9 @@ class _ProfilePageState extends State<ProfilePage> {
   int countTotalFollowers = 0;
   int countTotalFollowings = 0;
   bool following = false;
+  var totalPosts = 0;
+  var totalFollowers = 0;
+  var totalFollowing = 0;
 
   @override
   void initState() {
@@ -45,10 +50,13 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: ListView(
           children: [
-            createProfileTopView(),
+            Card(
+              color: Colors.white.withOpacity(0.95),
+              child: createProfileTopView(),
+            ),
             Divider(),
             createListAndGridPostOrientation(),
-            Divider(height: 0.0),
+            Divider(),
             displayProfilePost(),
           ],
         ),
@@ -65,61 +73,106 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         User user = User.fromDocument(dataSnapshot.data);
+
         return Padding(
           padding: EdgeInsets.all(15),
           child: Column(
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 45,
-                    backgroundColor: colorGrey,
-                    backgroundImage: CachedNetworkImageProvider(user.url),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            createColumns(title: 'posts', count: countPost),
-                            createColumns(
-                                title: 'followers', count: countTotalFollowers),
-                            createColumns(
-                                title: 'following',
-                                count: countTotalFollowings),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            createButton(),
-                          ],
-                        ),
-                      ],
+                  Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: colorWhite,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: CircleAvatar(
+                      radius: 45,
+                      backgroundImage: CachedNetworkImageProvider(user.url),
                     ),
                   ),
                 ],
               ),
+              SizedBox(height: 10),
               Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(top: 15),
-                child: Text(user.username,
-                    style: TextStyle(color: colorWhite, fontSize: 14)),
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 padding: EdgeInsets.only(top: 5),
-                child: Text(user.profileName,
-                    style: TextStyle(color: colorWhite, fontSize: 18)),
+                child: Text(
+                  user.profileName.toUpperCase(),
+                  style: TextStyle(
+                    color: colorBlack,
+                    fontSize: 18,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(top: 3),
-                child: Text(user.bio,
-                    style: TextStyle(color: Colors.white70, fontSize: 18)),
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(top: 5),
+                child: Text(
+                  user.username,
+                  style: TextStyle(
+                    color: colorBlack,
+                    fontSize: 16,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 5,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: colorBlack,
+                ),
+                child: Container(
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          createColumns(title: 'Posts', count: countPost),
+                          createColumns(
+                              title: 'Followers', count: countTotalFollowers),
+                          createColumns(
+                              title: 'Following', count: countTotalFollowings),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              user.bio.trim().length > 1
+                  ? Container(
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.only(top: 3),
+                      child: Text(
+                        user.bio,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Quicksand',
+                        ),
+                      ),
+                    )
+                  : Text(''),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  createButton(),
+                ],
               ),
             ],
           ),
@@ -134,16 +187,23 @@ class _ProfilePageState extends State<ProfilePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          count.toString(),
+          NumberFormat.compact().format(count).toString(),
           style: TextStyle(
-              fontSize: 20, color: colorWhite, fontWeight: FontWeight.bold),
+              fontSize: 20,
+              color: colorWhite,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Quicksand'),
         ),
         Container(
           margin: EdgeInsets.only(top: 5),
           child: Text(
             title,
             style: TextStyle(
-                fontSize: 16, color: colorGrey, fontWeight: FontWeight.w400),
+              fontSize: 16,
+              color: Colors.grey,
+              fontFamily: 'Quicksand',
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -170,23 +230,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
   createButtonTitleAndFunction({String title, Function performFunction}) {
     return Container(
-      padding: EdgeInsets.only(top: 3),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: following ? colorGrey : colorBlack,
+        border: Border.all(color: colorGrey),
+        borderRadius: BorderRadius.circular(6),
+      ),
       child: FlatButton(
         onPressed: performFunction,
-        child: Container(
-          width: 245,
-          height: 25,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: following ? colorBlack : Colors.white70,
-            border: Border.all(color: colorGrey),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            title,
-            style: TextStyle(
-                color: following ? colorGrey : Colors.white70,
-                fontWeight: FontWeight.bold),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: following ? colorWhite : colorWhite,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

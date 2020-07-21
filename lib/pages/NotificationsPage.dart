@@ -1,6 +1,5 @@
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
-import 'package:beena_social_app/pages/PostScreenPage.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
@@ -140,7 +139,8 @@ class NotificationsItem extends StatelessWidget {
   configureMediaPreview(context) {
     if (type == 'comment' || type == 'like') {
       mediaPreview = GestureDetector(
-        onTap: () => displayFullPost(context),
+        onTap: () =>
+            displayOwnerProfile(context, userProfileId: currentUser.id),
         child: Container(
           height: 50,
           width: 50,
@@ -172,15 +172,10 @@ class NotificationsItem extends StatelessWidget {
     }
   }
 
-  displayFullPost(BuildContext context) {
+  displayOwnerProfile(BuildContext context, {String userProfileId}) {
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostScreenPage(
-          postId: postId,
-          userId: userId,
-        ),
-      ),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfilePage(userProfileId: userProfileId)));
   }
 }

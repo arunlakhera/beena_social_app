@@ -51,7 +51,6 @@ class _TimeLinePageState extends State<TimeLinePage> {
     List<Post> allPosts = querySnapshot.documents
         .map((document) => Post.fromDocument(document))
         .toList();
-    print('timeline QuerySnap: ${querySnapshot.documents.length}');
 
     setState(() {
       this.posts = allPosts;
@@ -64,20 +63,17 @@ class _TimeLinePageState extends State<TimeLinePage> {
         .document(currentUser.id)
         .collection('userFollowing')
         .getDocuments();
-    print('Following QuerySnap: ${querySnapshot.documents.length}');
     setState(() {
       followingsList = querySnapshot.documents
           .map((document) => document.documentID)
           .toList();
     });
-    print('followingsList: ${followingsList.toString()}');
   }
 
   createTimeLine() {
     if (posts == null) {
       return circularProgress();
     } else {
-      print('post: ${posts.length}');
       return ListView(
         children: posts,
       );

@@ -28,6 +28,7 @@ dependencies:
   firebase_storage: ^3.1.6
   flutter_auth_buttons: ^0.8.0
   font_awesome_flutter: ^8.8.1
+  intl: ^0.16.1
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +41,10 @@ flutter:
     - family: Signatra
       fonts:
         - asset: assets/fonts/Signatra.ttf
+
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-VariableFont_wght.ttf
 assets:
   - assets/images/
 

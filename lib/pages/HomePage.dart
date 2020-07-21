@@ -13,8 +13,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final usersReference = Firestore.instance.collection('users');
@@ -35,13 +35,16 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isSignedIn = false;
 
   PageController pageController;
   int getPageIndex = 0;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  AnimationController controller;
+  Animation animation;
 
   @override
   void initState() {
@@ -60,10 +63,30 @@ class _HomePageState extends State<HomePage> {
         .catchError((googleError) {
       print('Error Message: $googleError');
     });
+
+    // Animation
+    controller = AnimationController(
+        duration: Duration(seconds: 2), vsync: this, lowerBound: 0.5);
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
+    controller.forward();
+
+    controller.addStatusListener((status) {
+      setState(() {
+        if (status == AnimationStatus.completed) {
+          controller.reverse(from: 1.0);
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
+    });
+    controller.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    controller.dispose();
     pageController.dispose();
     super.dispose();
   }
@@ -124,72 +147,113 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                //Theme.of(context).accentColor,
-                colorWhite,
-                colorOffWhite,
-                Theme.of(context).primaryColor,
+                Colors.black54,
+                Colors.grey.shade800,
               ],
-              begin: Alignment.topRight,
+              begin: Alignment.topLeft,
               end: Alignment.bottomCenter,
             ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.grey.shade300,
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(10, 10),
-                      color: Colors.black38,
-                      blurRadius: 20,
-                    ),
-                    BoxShadow(
-                      offset: Offset(-10, -10),
-                      color: Colors.white.withOpacity(0.85),
-                      blurRadius: 20,
-                    )
-                  ],
-                ),
-                child: Text(
-                  'Been-A-snap!',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(3, 3),
+              Expanded(
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      //color: Colors.grey.shade300,
+                      color: Colors.grey.shade800,
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(10, 10),
                           color: Colors.black38,
-                          blurRadius: 10),
-                      Shadow(
-                          offset: Offset(-3, -3),
-                          color: Colors.black.withOpacity(0.85),
-                          blurRadius: 10)
-                    ],
-                    color: Colors.white, //Colors.grey.shade300,
+                          blurRadius: 40,
+                        ),
+                        BoxShadow(
+                          offset: Offset(-10, -10),
+//                      color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withOpacity(0.2),
+                          blurRadius: 40,
+                        )
+                      ],
+                    ),
+                    child: Text(
+                      'Been-A-snap!',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 40,
+                        shadows: [
+                          Shadow(
+                              offset: Offset(3, 3),
+                              color: Colors.black38,
+                              blurRadius: 10),
+                          Shadow(
+                              offset: Offset(-3, -3),
+                              color: Colors.black.withOpacity(0.85),
+                              blurRadius: 10)
+                        ],
+                        color: Colors.white, //Colors.grey.shade300,
+                      ),
+                    ),
                   ),
                 ),
               ),
               SizedBox(height: 50),
-              Column(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: GoogleSignInButton(
-                      onPressed: () {
-                        googleLoginUser();
-                      },
-                      splashColor: Colors.deepOrangeAccent,
-                      borderRadius: 5,
+                  InkWell(
+                    onTap: () => googleLoginUser(),
+                    child: Hero(
+                      tag: 'heart_black_1',
+                      child: Transform.rotate(
+                        angle: 0.0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: animation.value * 20,
+                              vertical: animation.value * 10),
+                          margin: EdgeInsets.only(bottom: 30),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.deepOrange,
+                          ),
+                          child: FaIcon(
+                            FontAwesomeIcons.google,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
+                  SizedBox(width: 10),
+//                  Hero(
+//                    tag: 'heart_black_1',
+//                    child: Transform.rotate(
+//                      angle: 0.0,
+//                      child: Container(
+//                        alignment: Alignment.center,
+//                        padding: EdgeInsets.symmetric(
+//                            horizontal: animation.value * 20,
+//                            vertical: animation.value * 10),
+//                        margin: EdgeInsets.only(bottom: 30),
+//                        decoration: BoxDecoration(
+//                          borderRadius: BorderRadius.circular(10),
+//                          color: Colors.blueAccent,
+//                        ),
+//                        child: InkWell(
+//                          onTap: () => googleLoginUser(),
+//                          child: FaIcon(
+//                            FontAwesomeIcons.facebookSquare,
+//                            color: Colors.white,
+//                            size: 30,
+//                          ),
+//                        ),
+//                      ),
+//                    ),
+//                  ),
                 ],
               ),
             ],
