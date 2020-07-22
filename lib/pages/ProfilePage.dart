@@ -48,16 +48,12 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: colorWhite,
       appBar: header(context, strTitle: 'Profile'),
       body: SafeArea(
         child: ListView(
           children: [
-//            Card(
-//              color: Colors.white.withOpacity(0.95),
-//              child: createProfileTopView(),
-//            ),
             createProfileTopView(),
-            Divider(),
             createListAndGridPostOrientation(),
             Divider(),
             displayProfilePost(),
@@ -162,7 +158,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Card(
-//              color: Colors.grey.shade800,
               color: Colors.white,
               child: Container(
                 margin: EdgeInsets.all(10),
@@ -330,24 +325,26 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createListAndGridPostOrientation() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        IconButton(
-          onPressed: () => setOrientation('grid'),
-          icon: Icon(Icons.grid_on),
-          color: postOrientation == 'grid'
-              ? Theme.of(context).primaryColor
-              : colorGrey,
-        ),
-        IconButton(
-          onPressed: () => setOrientation('list'),
-          icon: Icon(Icons.list),
-          color: postOrientation == 'list'
-              ? Theme.of(context).primaryColor
-              : colorGrey,
-        ),
-      ],
+    return Card(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            onPressed: () => setOrientation('grid'),
+            icon: Icon(Icons.grid_on),
+            color: postOrientation == 'grid'
+                ? Theme.of(context).primaryColor
+                : colorGrey,
+          ),
+          IconButton(
+            onPressed: () => setOrientation('list'),
+            icon: Icon(Icons.list),
+            color: postOrientation == 'list'
+                ? Theme.of(context).primaryColor
+                : colorGrey,
+          ),
+        ],
+      ),
     );
   }
 

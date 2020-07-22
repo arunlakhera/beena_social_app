@@ -5,7 +5,6 @@ import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String currentOnlineUserId;
@@ -51,59 +50,114 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: SafeArea(
         child: loading
             ? circularProgress()
-            : ListView(
-                children: [
-                  Card(
-                    elevation: 2,
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Container(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(top: 16, bottom: 7),
-                            child: CircleAvatar(
-                              radius: 52,
-                              backgroundImage:
-                                  CachedNetworkImageProvider(user.url),
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                createProfileNameTextFormField(),
-                                SizedBox(height: 20),
-                                createBioTextFormField(),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                FloatingActionButton(
-                                  heroTag: 'logout_btn',
-                                  onPressed: logoutUser,
-                                  child: Icon(Icons.exit_to_app,
-                                      color: Colors.red),
-                                ),
-                                FloatingActionButton(
-                                  heroTag: 'save_btn',
-                                  onPressed: updateUserData,
-                                  child: Icon(Icons.save),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+            : Card(
+                elevation: 2,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 30,
+                      child: Text(
+                        'Been-a-Snap!',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.withOpacity(0.3),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    ListView(
+                      children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: 16, bottom: 7),
+                              child: CircleAvatar(
+                                radius: 52,
+                                backgroundImage:
+                                    CachedNetworkImageProvider(user.url),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  createProfileNameTextFormField(),
+                                  SizedBox(height: 20),
+                                  createBioTextFormField(),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 50),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  InkWell(
+                                    onTap: logoutUser,
+                                    child: Container(
+                                      width: 120,
+                                      height: 50,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 10),
+                                      decoration: BoxDecoration(
+                                        color: colorBlack,
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.exit_to_app,
+                                              color: Colors.red),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            'Logout',
+                                            style: TextStyle(color: colorWhite),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: updateUserData,
+                                    child: Container(
+                                      width: 120,
+                                      height: 50,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 10),
+                                      decoration: BoxDecoration(
+                                        color: colorBlack,
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.save, color: Colors.green),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            'Save',
+                                            style: TextStyle(color: colorWhite),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
       ),
     );
