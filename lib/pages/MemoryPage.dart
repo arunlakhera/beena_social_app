@@ -1,23 +1,24 @@
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
+import 'package:beena_social_app/pages/CreateMemory.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
-import 'package:beena_social_app/widgets/PostWidget.dart';
+import 'package:beena_social_app/widgets/MemoryWidget.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class TimeLinePage extends StatefulWidget {
+class MemoryPage extends StatefulWidget {
   final User googleCurrentUser;
 
-  TimeLinePage({this.googleCurrentUser});
+  MemoryPage({this.googleCurrentUser});
 
   @override
-  _TimeLinePageState createState() => _TimeLinePageState();
+  _MemoryPageState createState() => _MemoryPageState();
 }
 
-class _TimeLinePageState extends State<TimeLinePage> {
-  List<Post> posts = [];
+class _MemoryPageState extends State<MemoryPage> {
+  List<Memory> memoryPosts = [];
   List<String> followingsList = [];
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int currentLength = 0;
@@ -38,8 +39,8 @@ class _TimeLinePageState extends State<TimeLinePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: colorWhite,
       appBar: header(context, isAppTitle: true),
+      backgroundColor: colorWhite,
       body: SafeArea(
         child: Stack(
           children: [
@@ -66,22 +67,48 @@ class _TimeLinePageState extends State<TimeLinePage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return CreateMemory(googleCurrentUser: currentUser);
+          }));
+        },
+        backgroundColor: colorBlack,
+        foregroundColor: colorOffWhite,
+        child: Icon(
+          Icons.add,
+          size: 40,
+        ),
+      ),
     );
+  }
+
+  createTimeLine() {
+    if (memoryPosts == null) {
+      return circularProgress();
+    } else {
+      return ListView.builder(
+        itemCount: memoryPosts.length,
+        itemBuilder: (context, index) {
+          return memoryPosts[index];
+        },
+      );
+    }
   }
 
   retrieveTimeLine() async {
     QuerySnapshot querySnapshot = await timelineReference
         .document(widget.googleCurrentUser.id)
-        .collection('timelinePosts')
+        .collection('timelineMemory')
         .orderBy('timestamp', descending: true)
         .getDocuments();
 
-    List<Post> allPosts = querySnapshot.documents
-        .map((document) => Post.fromDocument(document))
+    List<Memory> allMemoryPosts = querySnapshot.documents
+        .map((document) => Memory.fromDocument(document))
         .toList();
 
     setState(() {
-      this.posts = allPosts;
+      this.memoryPosts = allMemoryPosts;
       retrieveFollowings();
     });
   }
@@ -97,18 +124,5 @@ class _TimeLinePageState extends State<TimeLinePage> {
           .map((document) => document.documentID)
           .toList();
     });
-  }
-
-  createTimeLine() {
-    if (posts == null) {
-      return circularProgress();
-    } else {
-      return ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (context, index) {
-          return posts[index];
-        },
-      );
-    }
   }
 }

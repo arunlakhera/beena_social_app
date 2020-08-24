@@ -17,81 +17,102 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: colorWhite,
       appBar: header(
         context,
         strTitle: 'Settings',
         hideBackButton: true,
       ),
-      body: ListView(
+      body: Stack(
         children: [
-          Container(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 25),
-                  child: Center(
-                    child: Text(
-                      'Set up a username',
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Container(
-                    child: Form(
-                      key: _formKey,
-                      autovalidate: true,
-                      child: TextFormField(
-                        style: TextStyle(color: colorWhite),
-                        validator: (val) {
-                          if (val.isEmpty || val.length < 5) {
-                            return 'username is too short';
-                          } else if (val.length > 20) {
-                            return 'username is too long';
-                          } else {
-                            return null;
-                          }
-                        },
-                        onSaved: (value) => username = value,
-                        decoration: InputDecoration(
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: colorGrey)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: colorWhite)),
-                          border: OutlineInputBorder(),
-                          labelText: 'Username',
-                          labelStyle: TextStyle(fontSize: 16),
-                          hintText: 'must bt at least 5 characters.',
-                          hintStyle: TextStyle(color: colorGrey),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: submitUserName,
-                  child: Container(
-                    height: 55,
-                    width: 360,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Proceed',
-                        style: TextStyle(
-                          color: colorWhite,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 30,
+            child: Text(
+              'Been-a-Snap!',
+              style: TextStyle(
+                fontSize: 50,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Signatra',
+                color: Colors.grey.withOpacity(0.2),
+              ),
             ),
+          ),
+          ListView(
+            children: [
+              Container(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 25),
+                      child: Center(
+                        child: Text(
+                          'Set up a username',
+                          style: TextStyle(fontSize: 25),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        autovalidate: true,
+                        child: TextFormField(
+                          style: TextStyle(color: colorBlack),
+                          validator: (val) {
+                            if (val.isEmpty || val.length < 5) {
+                              return 'Username is too short';
+                            } else if (val.length > 20) {
+                              return 'Username is too long';
+                            } else {
+                              return null;
+                            }
+                          },
+                          onSaved: (value) => username = value,
+                          decoration: InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: colorGrey)),
+                            focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(width: 1, color: Colors.green)),
+                            border: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(width: 1, color: Colors.green)),
+                            labelText: 'Username',
+                            labelStyle: TextStyle(fontSize: 16),
+                            hintText: 'must bt at least 5 characters.',
+                            hintStyle: TextStyle(color: colorGrey),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: submitUserName,
+                      child: Container(
+                        height: 55,
+                        width: MediaQuery.of(context).size.width / 2,
+                        decoration: BoxDecoration(
+                          color: colorBlack,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Proceed',
+                            style: TextStyle(
+                              color: colorWhite,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -103,9 +124,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     if (form.validate()) {
       form.save();
 
-      SnackBar snackBar = SnackBar(
-        content: Text('Welcome $username'),
-      );
+      SnackBar snackBar = SnackBar(content: Text('Welcome $username'));
       _scaffoldKey.currentState.showSnackBar(snackBar);
       Timer(Duration(seconds: 4), () {
         Navigator.pop(context, username);

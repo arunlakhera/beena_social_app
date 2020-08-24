@@ -17,21 +17,40 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: colorWhite,
       appBar: header(context, strTitle: 'Notification'),
       body: SafeArea(
-        child: Container(
-          child: FutureBuilder(
-            future: retrieveNotifications(),
-            builder: (context, dataSnapshot) {
-              if (!dataSnapshot.hasData) {
-                return circularProgress();
-              }
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 30,
+              child: Text(
+                'Been-a-Snap!',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Signatra',
+                  color: Colors.grey.withOpacity(0.2),
+                ),
+              ),
+            ),
+            Container(
+              child: FutureBuilder(
+                future: retrieveNotifications(),
+                builder: (context, dataSnapshot) {
+                  if (!dataSnapshot.hasData) {
+                    return circularProgress();
+                  }
 
-              return ListView(
-                children: dataSnapshot.data,
-              );
-            },
-          ),
+                  return ListView(
+                    children: dataSnapshot.data,
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -93,37 +112,40 @@ class NotificationsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     configureMediaPreview(context);
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: 2),
-      child: Container(
-        color: Colors.white70,
-        child: ListTile(
-          title: GestureDetector(
-            onTap: () => displayUserProfile(context, userProfileId: userId),
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                style: TextStyle(fontSize: 14, color: colorBlack),
-                children: [
-                  TextSpan(
-                    text: username,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 2),
+        child: Container(
+          color: Colors.white70,
+          child: ListTile(
+            title: GestureDetector(
+              onTap: () => displayUserProfile(context, userProfileId: userId),
+              child: RichText(
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  style: TextStyle(fontSize: 14, color: colorBlack),
+                  children: [
+                    TextSpan(
+                      text: username,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  TextSpan(text: ' $notificationItemText'),
-                ],
+                    TextSpan(text: ' $notificationItemText'),
+                  ],
+                ),
               ),
             ),
+            leading: CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(userProfileImg),
+            ),
+            subtitle: Text(
+              timeAgo.format(timestamp.toDate()),
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: mediaPreview,
           ),
-          leading: CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(userProfileImg),
-          ),
-          subtitle: Text(
-            timeAgo.format(timestamp.toDate()),
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: mediaPreview,
         ),
       ),
     );

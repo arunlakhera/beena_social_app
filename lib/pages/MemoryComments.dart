@@ -1,30 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-class CommentsPage extends StatefulWidget {
-  final String postId;
-  final String postOwnerId;
-  final String postImageUrl;
+class MemoryComments extends StatefulWidget {
+  final String memoryId;
+  final String memoryOwnerId;
+  final String memoryImageUrl;
 
-  CommentsPage({this.postId, this.postOwnerId, this.postImageUrl});
+  MemoryComments({this.memoryId, this.memoryOwnerId, this.memoryImageUrl});
 
   @override
-  _CommentsPageState createState() => _CommentsPageState(
-      postId: postId, postOwnerId: postOwnerId, postImageUrl: postImageUrl);
+  _MemoryCommentsState createState() => _MemoryCommentsState(
+      memoryId: memoryId,
+      memoryOwnerId: memoryOwnerId,
+      memoryImageUrl: memoryImageUrl);
 }
 
-class _CommentsPageState extends State<CommentsPage> {
-  final String postId;
-  final String postOwnerId;
-  final String postImageUrl;
+class _MemoryCommentsState extends State<MemoryComments> {
+  final String memoryId;
+  final String memoryOwnerId;
+  final String memoryImageUrl;
   TextEditingController commentsTextEditingController = TextEditingController();
-  _CommentsPageState({this.postId, this.postOwnerId, this.postImageUrl});
+  _MemoryCommentsState(
+      {this.memoryId, this.memoryOwnerId, this.memoryImageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +72,8 @@ class _CommentsPageState extends State<CommentsPage> {
 
   retrieveComments() {
     return StreamBuilder(
-      stream: commentsReference
-          .document(postId)
+      stream: memoryCommentsReference
+          .document(memoryId)
           .collection('comments')
           .orderBy('timestamp', descending: false)
           .snapshots(),
@@ -102,26 +105,26 @@ class _CommentsPageState extends State<CommentsPage> {
     String userComment = commentsTextEditingController.text;
 
     if (userComment.length > 0) {
-      commentsReference.document(postId).collection('comments').add({
+      memoryCommentsReference.document(memoryId).collection('comments').add({
         'username': currentUser.username,
         'comment': commentsTextEditingController.text,
         'timestamp': DateTime.now(),
         'url': currentUser.url,
         'userId': currentUser.id,
       });
-      bool isNotPostOwner = (postOwnerId != currentUser.id);
+      bool isNotPostOwner = (memoryOwnerId != currentUser.id);
       if (isNotPostOwner) {
         activityFeedReference
-            .document(postOwnerId)
+            .document(memoryOwnerId)
             .collection('feedItems')
             .add({
           'type': 'comment',
           'commentData': commentsTextEditingController.text,
-          'postId': postId,
+          'memoryId': memoryId,
           'userId': currentUser.id,
           'username': currentUser.username,
           'userProfileImg': currentUser.url,
-          'url': postImageUrl,
+          'url': memoryImageUrl,
           'timestamp': timeStamp,
         });
       }

@@ -7,6 +7,7 @@ class User {
   final String url;
   final String email;
   final String bio;
+  final bool isVip;
 
   User(
       {this.id,
@@ -14,7 +15,8 @@ class User {
       this.username,
       this.url,
       this.email,
-      this.bio});
+      this.bio,
+      this.isVip});
 
   factory User.fromDocument(DocumentSnapshot doc) {
     return User(
@@ -24,6 +26,7 @@ class User {
       url: doc['url'],
       email: doc['email'],
       bio: doc['bio'],
+      isVip: doc['isVip'],
     );
   }
 }

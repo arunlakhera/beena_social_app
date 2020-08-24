@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/CreateAccountPage.dart';
+import 'package:beena_social_app/pages/MemoryPage.dart';
 import 'package:beena_social_app/pages/NotificationsPage.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/pages/SearchPage.dart';
@@ -20,9 +21,15 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
 final usersReference = Firestore.instance.collection('users');
 final StorageReference storageReference =
     FirebaseStorage.instance.ref().child('Posts Pictures');
+final StorageReference memoryStorageReference =
+    FirebaseStorage.instance.ref().child('Memory Pictures');
+final StorageReference recordingStorageReference =
+    FirebaseStorage.instance.ref().child('Memory Recordings');
 final postsReference = Firestore.instance.collection('posts');
+final memoryReference = Firestore.instance.collection('memory');
 final activityFeedReference = Firestore.instance.collection('feed');
 final commentsReference = Firestore.instance.collection('comments');
+final memoryCommentsReference = Firestore.instance.collection('memoryComments');
 final followersReference = Firestore.instance.collection('followers');
 final followingReference = Firestore.instance.collection('following');
 final timelineReference = Firestore.instance.collection('timeline');
@@ -37,12 +44,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool isSignedIn = false;
 
   PageController pageController;
   int getPageIndex = 0;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
+  bool isSignedIn = false;
   @override
   void initState() {
     super.initState();
@@ -85,6 +91,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             TimeLinePage(googleCurrentUser: currentUser),
             SearchPage(),
+            MemoryPage(googleCurrentUser: currentUser),
             UploadPage(googleCurrentUser: currentUser),
             NotificationsPage(),
             ProfilePage(userProfileId: currentUser.id),
@@ -97,15 +104,16 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: CupertinoTabBar(
         currentIndex: getPageIndex,
         onTap: onTapChangePage,
-        backgroundColor: Theme.of(context).accentColor,
-        activeColor: Colors.white,
+        backgroundColor: colorWhite, //Theme.of(context).accentColor,
+        activeColor: colorBlack,
         inactiveColor: Colors.blueGrey,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home)),
-          BottomNavigationBarItem(icon: Icon(Icons.search)),
-          BottomNavigationBarItem(icon: Icon(Icons.photo_camera, size: 35)),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite)),
-          BottomNavigationBarItem(icon: Icon(Icons.person)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.commentAlt)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.searchPlus)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.pagelines)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.cameraRetro)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.solidHeart)),
+          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.addressCard)),
         ],
       ),
     );
@@ -120,9 +128,12 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.black,
-                Colors.black,
-                Colors.deepPurple.withOpacity(0.2),
+                //Colors.blue.shade100.withOpacity(0.8),
+                Color(0xFFf0f5fc),
+                Colors.yellow.shade200,
+                colorWhite,
+                Color(0xFFf0f5fc),
+                //Colors.deepPurple.withOpacity(0.2),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -135,43 +146,25 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.grey.shade900.withOpacity(0.1),
-                      //color: Colors.black.withOpacity(0.8),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: Offset(5, 5),
-                          color: Colors.black38,
-                          blurRadius: 40,
-                        ),
-                        BoxShadow(
-                          offset: Offset(-5, -5),
-//                      color: Colors.white.withOpacity(0.85),
-                          color: Colors.white.withOpacity(0.2),
-                          blurRadius: 40,
-                        )
-                      ],
-                    ),
                     child: Text(
                       'Been-A-snap!',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 40,
+                        fontSize: 60,
                         fontFamily: 'Signatra',
-                        letterSpacing: 2,
-                        wordSpacing: 2,
+                        letterSpacing: 3,
+                        wordSpacing: 3,
                         shadows: [
                           Shadow(
-                              offset: Offset(3, 3),
+                              offset: Offset(5, 5),
                               color: Colors.black38,
-                              blurRadius: 10),
+                              blurRadius: 6),
                           Shadow(
-                              offset: Offset(-3, -3),
-                              color: Colors.black.withOpacity(0.85),
-                              blurRadius: 10)
+                            color: Colors.black.withOpacity(0.85),
+                          )
                         ],
-                        color: Colors.white, //Colors.grey.shade300,
+                        color: Colors.black87,
+                        //color: Colors.grey.shade900,
                       ),
                     ),
                   ),
@@ -182,6 +175,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Container(
                     child: RaisedButton.icon(
+                      color: colorWhite,
                       onPressed: () => googleLoginUser(),
                       icon: FaIcon(
                         FontAwesomeIcons.google,
@@ -255,6 +249,7 @@ class _HomePageState extends State<HomePage> {
         'email': googleCurrentUser.email,
         'bio': '',
         'timestamp': timeStamp,
+        'isVip': false,
       });
 
       await followersReference

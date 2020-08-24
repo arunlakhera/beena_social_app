@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image/image.dart' as ImgDir;
 
@@ -24,10 +25,12 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage>
     with AutomaticKeepAliveClientMixin<UploadPage> {
+  final _scaffoldGlobalKey = GlobalKey<ScaffoldState>();
   File image;
   final picker = ImagePicker();
   bool uploading = false;
   String postId = Uuid().v4();
+  bool postUploadSuccess = false;
 
   TextEditingController descriptionTextEditingController =
       TextEditingController();
@@ -43,7 +46,7 @@ class _UploadPageState extends State<UploadPage>
 
   Widget displayUploadScreen() {
     return Container(
-      color: Theme.of(context).accentColor.withOpacity(0.5),
+      color: colorWhite,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -65,7 +68,7 @@ class _UploadPageState extends State<UploadPage>
                   fontSize: 20,
                 ),
               ),
-              color: Colors.green,
+              color: Colors.black,
               onPressed: () => takeImage(context),
             ),
           ),
@@ -139,18 +142,20 @@ class _UploadPageState extends State<UploadPage>
 
   displayUploadFormScreen() {
     return Scaffold(
+      key: _scaffoldGlobalKey,
+      backgroundColor: colorWhite,
       appBar: AppBar(
-        backgroundColor: colorBlack,
+        backgroundColor: colorWhite,
         leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: colorWhite,
+              color: colorBlack,
             ),
             onPressed: clearPostInfo),
         title: Text(
           'New Post',
           style: TextStyle(
-            color: colorWhite,
+            color: colorBlack,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -161,7 +166,7 @@ class _UploadPageState extends State<UploadPage>
             child: Text(
               'Share',
               style: TextStyle(
-                color: Colors.lightGreenAccent,
+                color: Colors.green,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -198,11 +203,11 @@ class _UploadPageState extends State<UploadPage>
             title: Container(
               width: 250,
               child: TextField(
-                style: TextStyle(color: colorWhite),
+                style: TextStyle(color: colorBlack),
                 controller: descriptionTextEditingController,
                 decoration: InputDecoration(
                   hintText: 'Say Something about your image',
-                  hintStyle: TextStyle(color: colorWhite),
+                  hintStyle: TextStyle(color: colorBlack),
                   border: InputBorder.none,
                 ),
               ),
@@ -212,22 +217,23 @@ class _UploadPageState extends State<UploadPage>
           ListTile(
             leading: Icon(
               Icons.person_pin_circle,
-              color: colorWhite,
+              color: colorBlack,
               size: 36,
             ),
             title: Container(
               width: 250,
               child: TextField(
-                style: TextStyle(color: colorWhite),
+                style: TextStyle(color: colorBlack),
                 controller: locationTextEditingController,
                 decoration: InputDecoration(
                   hintText: 'My Location',
-                  hintStyle: TextStyle(color: colorWhite),
+                  hintStyle: TextStyle(color: colorBlack),
                   border: InputBorder.none,
                 ),
               ),
             ),
           ),
+          Divider(),
           Container(
             width: 220,
             height: 110,
@@ -236,7 +242,7 @@ class _UploadPageState extends State<UploadPage>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(35),
               ),
-              color: Colors.green,
+              color: colorBlack,
               icon: Icon(
                 Icons.location_on,
                 color: colorWhite,
@@ -282,18 +288,24 @@ class _UploadPageState extends State<UploadPage>
     await compressingPhoto();
 
     String downloadUrl = await uploadPhoto(image);
-    savePostInfoToFirestore(
-        url: downloadUrl,
-        location: locationTextEditingController.text,
-        description: descriptionTextEditingController.text);
-    locationTextEditingController.clear();
-    descriptionTextEditingController.clear();
+    if (downloadUrl == null && locationTextEditingController.text == null) {
+      print('Can not Save as Photo is not provided or Post not provided');
+    } else {
+      savePostInfoToFirestore(
+          url: downloadUrl,
+          location: locationTextEditingController.text,
+          description: descriptionTextEditingController.text);
 
-    setState(() {
-      image = null;
-      uploading = false;
-      postId = Uuid().v4();
-    });
+      locationTextEditingController.clear();
+      descriptionTextEditingController.clear();
+
+      setState(() {
+        image = null;
+        uploading = false;
+        postId = Uuid().v4();
+        postUploadSuccess = true;
+      });
+    }
   }
 
   compressingPhoto() async {
@@ -330,6 +342,30 @@ class _UploadPageState extends State<UploadPage>
       'description': description,
       'location': location,
       'url': url,
-    });
+    }).whenComplete(() => showPostAlert(
+            postMsg: 'Your Post has been published.', msgType: true));
+  }
+
+  showPostAlert({String postMsg, bool msgType = false}) {
+    Alert(
+      context: context,
+      type: msgType ? AlertType.success : AlertType.error,
+      style: AlertStyle(backgroundColor: colorWhite),
+      title: "Post",
+      content: Text(
+        msgType ? postMsg : 'Could not Post. Try Again!',
+        style: TextStyle(color: colorBlack, fontSize: 16),
+      ),
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Ok",
+            style: TextStyle(color: colorWhite, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          width: 120,
+        )
+      ],
+    ).show();
   }
 }

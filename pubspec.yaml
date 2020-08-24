@@ -29,6 +29,12 @@ dependencies:
   flutter_auth_buttons: ^0.8.0
   font_awesome_flutter: ^8.8.1
   intl: ^0.16.1
+  rflutter_alert: ^1.0.3
+  shimmer: ^1.1.1
+  permission_handler: ^5.0.1+1
+  record_mp3: ^2.0.0
+  audioplayers: ^0.15.1
+  carousel_pro: ^1.0.0
 
 dev_dependencies:
   flutter_test:

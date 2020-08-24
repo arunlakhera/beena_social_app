@@ -20,7 +20,7 @@ class _SearchPageState extends State<SearchPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colorBlack,
+      backgroundColor: colorWhite,
       appBar: searchPageHeader(),
       body: futureSearchResults == null
           ? displayNoSearchResultScreen()
@@ -30,18 +30,19 @@ class _SearchPageState extends State<SearchPage>
 
   AppBar searchPageHeader() {
     return AppBar(
-      backgroundColor: colorBlack,
+      backgroundColor: colorWhite,
       title: TextFormField(
         style: TextStyle(
           fontSize: 20,
-          color: colorWhite,
+          color: colorBlack,
         ),
         controller: searchTextEditingController,
         decoration: InputDecoration(
+          fillColor: colorWhite,
           hintText: 'Search here...',
           hintStyle: TextStyle(color: colorGrey),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: colorGrey),
+            borderSide: BorderSide(color: colorWhite),
           ),
           focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: colorWhite),
@@ -49,13 +50,13 @@ class _SearchPageState extends State<SearchPage>
           filled: true,
           prefixIcon: Icon(
             Icons.person,
-            color: colorWhite,
+            color: colorBlack,
             size: 30,
           ),
           suffixIcon: IconButton(
             icon: Icon(
               Icons.clear,
-              color: colorWhite,
+              color: colorBlack,
             ),
             onPressed: clearSearchTextField,
           ),
@@ -65,14 +66,15 @@ class _SearchPageState extends State<SearchPage>
     );
   }
 
-  void clearSearchTextField() {
+  clearSearchTextField() {
     searchTextEditingController.clear();
   }
 
-  void controlSearching(String searchUser) {
+  controlSearching(String searchUser) {
     Future<QuerySnapshot> allUsers = usersReference
-        .where('profileName', isGreaterThanOrEqualTo: searchUser)
+        .where('profileName', isGreaterThanOrEqualTo: searchUser.trim())
         .getDocuments();
+
     setState(() {
       futureSearchResults = allUsers;
     });
@@ -94,7 +96,7 @@ class _SearchPageState extends State<SearchPage>
               'Search Users',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: colorWhite,
+                color: colorGrey,
                 fontWeight: FontWeight.w500,
                 fontSize: 50,
               ),
@@ -137,40 +139,43 @@ class UserResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(3),
-      child: Container(
-        color: Colors.white54,
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () => displayUserProfile(
-                context,
-                userProfileId: eachUser.id,
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: colorBlack,
-                  backgroundImage: CachedNetworkImageProvider(eachUser.url),
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: EdgeInsets.all(3),
+        child: Container(
+          color: Colors.white54,
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () => displayUserProfile(
+                  context,
+                  userProfileId: eachUser.id,
                 ),
-                title: Text(
-                  eachUser.profileName,
-                  style: TextStyle(
-                    color: colorBlack,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: colorBlack,
+                    backgroundImage: CachedNetworkImageProvider(eachUser.url),
+                  ),
+                  title: Text(
+                    eachUser.profileName,
+                    style: TextStyle(
+                      color: colorBlack,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    eachUser.username,
+                    style: TextStyle(
+                      color: colorBlack,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-                subtitle: Text(
-                  eachUser.username,
-                  style: TextStyle(
-                    color: colorBlack,
-                    fontSize: 13,
-                  ),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

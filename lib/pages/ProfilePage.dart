@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userProfileId;
@@ -77,6 +78,8 @@ class _ProfilePageState extends State<ProfilePage> {
         return Column(
           children: [
             Card(
+              elevation: 3,
+              color: colorWhite,
               child: Container(
                 padding: EdgeInsets.all(5),
                 child: Column(
@@ -84,12 +87,42 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       children: [
                         Container(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                           decoration: BoxDecoration(
-                            color: colorWhite,
-                            borderRadius: BorderRadius.circular(50),
+                            color: user.isVip
+                                ? Colors.yellow.shade900
+                                : Colors.white,
                           ),
-                          child: Image(
-                              image: CachedNetworkImageProvider(user.url)),
+                          child: CachedNetworkImage(
+                            imageUrl: user.url,
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) {
+                              return Shimmer.fromColors(
+                                child: Container(height: 80),
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                loop: 5,
+                              );
+                            },
+                            errorWidget: (context, url, error) => Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 5),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                  ),
+                                  Text(
+                                    'Could not load Image...',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(width: 10),
                         Expanded(
@@ -115,13 +148,38 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              SizedBox(height: 10),
+                              Visibility(
+                                visible: user.isVip ? true : false,
+                                child: Row(
+                                  children: [
+                                    FaIcon(
+                                      FontAwesomeIcons.starOfLife,
+                                      size: 12,
+                                      color: Colors.yellow.shade900,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'VIP',
+                                      style: TextStyle(
+                                          color: Colors.yellow.shade900,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          letterSpacing: 1),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         ownProfile
                             ? IconButton(
                                 onPressed: () => editUserProfile(),
-                                icon: FaIcon(FontAwesomeIcons.edit),
+                                icon: FaIcon(
+                                  FontAwesomeIcons.edit,
+                                  color: colorBlack,
+                                ),
                               )
                             : Text(''),
                       ],
@@ -129,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     SizedBox(height: 10),
                     user.bio.trim().length > 1
                         ? Container(
-                            alignment: Alignment.center,
+                            alignment: Alignment.centerLeft,
                             padding: EdgeInsets.only(top: 3),
                             child: Text(
                               user.bio,
@@ -158,7 +216,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Card(
-              color: Colors.white,
+              elevation: 3,
+              color: colorWhite,
               child: Container(
                 margin: EdgeInsets.all(10),
                 padding: EdgeInsets.all(5),
@@ -249,15 +308,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   editUserProfile() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                EditProfilePage(currentOnlineUserId: currentOnlineUserId)));
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            //EditProfilePage(currentOnlineUserId: currentOnlineUserId),
+            EditProfilePage(),
+      ),
+    );
   }
 
   displayProfilePost() {
     if (loading) {
-      return circularProgress();
+      return linearProgress();
     } else if (postsList.isEmpty) {
       return Container(
         child: Column(
@@ -276,7 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Text(
                 'No Posts',
                 style: TextStyle(
-                    color: Colors.redAccent,
+                    color: colorBlack,
                     fontSize: 40,
                     fontWeight: FontWeight.bold),
               ),
@@ -285,6 +347,11 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
     } else if (postOrientation == 'grid') {
+      loading = false;
+      if (loading) {
+        loading = false;
+      }
+      linearProgress();
       List<GridTile> gridTilesList = [];
       postsList.forEach((eachPost) {
         gridTilesList.add(GridTile(child: PostTile(post: eachPost)));
@@ -326,23 +393,28 @@ class _ProfilePageState extends State<ProfilePage> {
 
   createListAndGridPostOrientation() {
     return Card(
+      elevation: 3,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          IconButton(
-            onPressed: () => setOrientation('grid'),
-            icon: Icon(Icons.grid_on),
-            color: postOrientation == 'grid'
-                ? Theme.of(context).primaryColor
-                : colorGrey,
-          ),
-          IconButton(
-            onPressed: () => setOrientation('list'),
-            icon: Icon(Icons.list),
-            color: postOrientation == 'list'
-                ? Theme.of(context).primaryColor
-                : colorGrey,
-          ),
+          FlatButton.icon(
+              onPressed: () => setOrientation('grid'),
+              icon: Icon(
+                Icons.grid_on,
+                color: postOrientation == 'grid'
+                    ? Theme.of(context).primaryColor
+                    : colorGrey,
+              ),
+              label: Text('')),
+          FlatButton.icon(
+              onPressed: () => setOrientation('list'),
+              icon: Icon(
+                Icons.list,
+                color: postOrientation == 'list'
+                    ? Theme.of(context).primaryColor
+                    : colorGrey,
+              ),
+              label: Text('')),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
 import 'package:beena_social_app/widgets/PostWidget.dart';
@@ -25,6 +26,7 @@ class PostScreenPage extends StatelessWidget {
         Post post = Post.fromDocument(dataSnapshot.data);
         return Center(
           child: Scaffold(
+            backgroundColor: colorWhite,
             appBar: header(context, strTitle: post.description),
             body: ListView(
               children: [

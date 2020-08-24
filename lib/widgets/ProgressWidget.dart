@@ -5,7 +5,7 @@ circularProgress() {
     alignment: Alignment.center,
     padding: EdgeInsets.only(top: 12),
     child: CircularProgressIndicator(
-      valueColor: AlwaysStoppedAnimation(Colors.lightGreenAccent),
+      valueColor: AlwaysStoppedAnimation(Colors.red),
     ),
   );
 }

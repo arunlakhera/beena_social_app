@@ -7,15 +7,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final String currentOnlineUserId;
+  //final String currentOnlineUserId;
 
-  EditProfilePage({this.currentOnlineUserId});
+  //EditProfilePage({this.currentOnlineUserId});
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  String currentOnlineUserId = currentUser?.id;
   TextEditingController profileNameTextEditingController =
       TextEditingController();
   TextEditingController bioTextEditingController = TextEditingController();
@@ -35,14 +36,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: colorWhite,
       key: _scaffoldGlobalKey,
       appBar: AppBar(
-        backgroundColor: colorBlack,
-        iconTheme: IconThemeData(color: colorWhite),
-        title: Text('Edit Profile', style: TextStyle(color: colorWhite)),
+        backgroundColor: colorWhite,
+        iconTheme: IconThemeData(color: colorBlack),
+        title: Text('Edit Profile', style: TextStyle(color: colorBlack)),
         actions: [
           IconButton(
-            icon: Icon(Icons.done, color: colorWhite, size: 30),
+            icon: Icon(Icons.done, color: colorBlack, size: 30),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -51,7 +53,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: loading
             ? circularProgress()
             : Card(
-                elevation: 2,
+                elevation: 3,
                 child: Stack(
                   children: [
                     Positioned(
@@ -61,9 +63,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Text(
                         'Been-a-Snap!',
                         style: TextStyle(
-                          fontSize: 30,
+                          fontSize: 50,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.withOpacity(0.3),
+                          fontFamily: 'Signatra',
+                          color: Colors.grey.withOpacity(0.2),
                         ),
                       ),
                     ),
@@ -241,7 +244,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
 
     if (_bioValid && _profileNameValid) {
-      usersReference.document(widget.currentOnlineUserId).updateData({
+      usersReference.document(currentOnlineUserId).updateData({
         'profileName': profileNameTextEditingController.text,
         'bio': bioTextEditingController.text,
       });
@@ -257,7 +260,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
 
     DocumentSnapshot documentSnapshot =
-        await usersReference.document(widget.currentOnlineUserId).get();
+        await usersReference.document(currentOnlineUserId).get();
     user = User.fromDocument(documentSnapshot);
     profileNameTextEditingController.text = user.profileName;
     bioTextEditingController.text = user.bio;
