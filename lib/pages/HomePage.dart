@@ -6,6 +6,7 @@ import 'package:beena_social_app/pages/CreateAccountPage.dart';
 import 'package:beena_social_app/pages/MemoryPage.dart';
 import 'package:beena_social_app/pages/NotificationsPage.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
+import 'package:beena_social_app/pages/RegisterPage.dart';
 import 'package:beena_social_app/pages/TimeLinePage.dart';
 import 'package:beena_social_app/pages/UploadPage.dart';
 import 'package:beena_social_app/utilities/AppColor.dart';
@@ -407,21 +408,35 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 SizedBox(height: 15),
-                RichText(
-                  text: TextSpan(
-                      text: 'Dont have an account? ',
-                      style: TextStyle(color: AppColor.PageBgColorBlueCrayola),
-                      children: [
-                        TextSpan(
-                          text: 'Register',
-                          style: TextStyle(
-                            color: AppColor.PageBgColorSkyBlue,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Don\'t have an account?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: AppColor.PageBgColorBlueCrayola,
+                          fontSize: 12,
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => RegisterPage()));
+                      },
+                      child: Text(
+                        'Register',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColor.PageBgColorSkyBlue,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ]
-                  ),
+                      ),
+                    ),
+
+                  ],
                 ),
               ],
             ),
@@ -430,81 +445,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  // Widget buildSignInScreen() {
-  //   return Scaffold(
-  //     body: SafeArea(
-  //       child: Container(
-  //         height: MediaQuery.of(context).size.height,
-  //         width: MediaQuery.of(context).size.width,
-  //         decoration: BoxDecoration(
-  //           gradient: LinearGradient(
-  //             colors: [
-  //               //Colors.blue.shade100.withOpacity(0.8),
-  //               Color(0xFFf0f5fc),
-  //               Colors.yellow.shade200,
-  //               colorWhite,
-  //               Color(0xFFf0f5fc),
-  //               //Colors.deepPurple.withOpacity(0.2),
-  //             ],
-  //             begin: Alignment.topCenter,
-  //             end: Alignment.bottomCenter,
-  //           ),
-  //         ),
-  //         child: Column(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Expanded(
-  //               child: Center(
-  //                 child: Container(
-  //                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-  //                   child: Text(
-  //                     'Been-A-snap!',
-  //                     style: TextStyle(
-  //                       fontWeight: FontWeight.bold,
-  //                       fontSize: 60,
-  //                       fontFamily: 'Signatra',
-  //                       letterSpacing: 3,
-  //                       wordSpacing: 3,
-  //                       shadows: [
-  //                         Shadow(
-  //                             offset: Offset(5, 5),
-  //                             color: Colors.black38,
-  //                             blurRadius: 6),
-  //                         Shadow(
-  //                           color: Colors.black.withOpacity(0.85),
-  //                         )
-  //                       ],
-  //                       color: Colors.black87,
-  //                       //color: Colors.grey.shade900,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //             Row(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Container(
-  //                   child: RaisedButton.icon(
-  //                     color: colorWhite,
-  //                     onPressed: () => googleLoginUser(),
-  //                     icon: FaIcon(
-  //                       FontAwesomeIcons.google,
-  //                       color: Colors.red.shade900,
-  //                       size: 25,
-  //                     ),
-  //                     label: Text('Sign In with Google'),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             SizedBox(height: 20),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   controlGoogleSignIn(GoogleSignInAccount signInAccount) async {
     if (signInAccount != null) {

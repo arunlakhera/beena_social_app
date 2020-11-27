@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "75910534720",
+    "firebase_url": "https://beena-social-app.firebaseio.com",
+    "project_id": "beena-social-app",
+    "storage_bucket": "beena-social-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75910534720:android:226718754116b77aa7b1a5",
+        "android_client_info": {
+          "package_name": "com.arunlakhera.beena_social_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "75910534720-su7v4ta48u4rbmvqo9l1m6j8s1udd44g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arunlakhera.beena_social_app",
+            "certificate_hash": "29d253c2e2ae22bd948c56cb54fc8ac208d21b05"
+          }
+        },
+        {
+          "client_id": "75910534720-dvmdhf6v954a7raq1gb9pmk4oc9op0vd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arunlakhera.beena_social_app",
+            "certificate_hash": "1b63bf0b8de76b01eacb8a60ee39cb67c7dd3e98"
+          }
+        },
+        {
+          "client_id": "75910534720-9ndggndrjratu7v71n36hn6ard2as6o2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpqgIQY-5ckxj1kLzWWfoakhnZXYih1vA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "75910534720-9ndggndrjratu7v71n36hn6ard2as6o2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "75910534720-s4sdi8nm8mpova132noe2i1098skfs8m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.arunlakhera.beenaSocialApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
