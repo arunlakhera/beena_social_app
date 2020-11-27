@@ -35,6 +35,9 @@ dependencies:
   record_mp3: ^2.0.0
   audioplayers: ^0.15.1
   carousel_pro: ^1.0.0
+  marquee: ^1.5.3
+  full_screen_image: ^1.0.2
+  multi_image_picker: ^4.7.12
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +54,6 @@ flutter:
     - family: Quicksand
       fonts:
         - asset: assets/fonts/Quicksand-VariableFont_wght.ttf
-assets:
-  - assets/images/
+  assets:
+    - assets/images/
 

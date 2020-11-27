@@ -1,8 +1,13 @@
 import 'package:beena_social_app/constants.dart';
+import 'package:beena_social_app/models/MemoryProfile.dart';
 import 'package:beena_social_app/models/user.dart';
+import 'package:beena_social_app/pages/CreateSubUser.dart';
 import 'package:beena_social_app/pages/EditProfilePage.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
+import 'package:beena_social_app/pages/MemoryPage.dart';
+import 'package:beena_social_app/pages/UserMemoryPage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
+import 'package:beena_social_app/widgets/MemoryWidget.dart';
 import 'package:beena_social_app/widgets/PostTileWidget.dart';
 import 'package:beena_social_app/widgets/PostWidget.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
@@ -12,22 +17,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userProfileId;
+  final bool postsFlag;
+  final bool memoriesFlag;
 
-  ProfilePage({this.userProfileId});
+  ProfilePage(
+      {this.userProfileId, this.postsFlag = true, this.memoriesFlag = false});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _ProfilePageState createState() =>
+      _ProfilePageState(userProfileId, postsFlag, memoriesFlag);
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   final String currentOnlineUserId = currentUser?.id;
+  //final String currentOnlineUserId;
   bool loading = false;
   int countPost = 0;
   List<Post> postsList = [];
+  List<MemoryProfile> memoryProfileList = [];
   String postOrientation = 'grid';
   int countTotalFollowers = 0;
   int countTotalFollowings = 0;
@@ -37,12 +47,19 @@ class _ProfilePageState extends State<ProfilePage> {
   var totalFollowing = 0;
   bool ownProfile = false;
 
+  String userProfileId;
+  bool postsFlag;
+  bool memoriesFlag;
+
+  _ProfilePageState(this.userProfileId, this.postsFlag, this.memoriesFlag);
+
   @override
   void initState() {
     super.initState();
     getAllProfilePosts();
     getAllFollowers();
     getAllFollowings();
+    getAllMemoryUsers();
     checkIfAlreadyFollowing();
   }
 
@@ -50,14 +67,23 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colorWhite,
-      appBar: header(context, strTitle: 'Profile'),
+      appBar: header(
+        context,
+        strTitle: 'Profile',
+      ),
       body: SafeArea(
         child: ListView(
           children: [
             createProfileTopView(),
+            Divider(),
+            createPostsMemoriesTab(),
+            Divider(),
             createListAndGridPostOrientation(),
             Divider(),
-            displayProfilePost(),
+            if (postsFlag)
+              displayProfilePost()
+            else if (memoriesFlag)
+              displayProfileMemories(),
           ],
         ),
       ),
@@ -65,7 +91,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createProfileTopView() {
-    ownProfile = (currentOnlineUserId == widget.userProfileId);
+    // setState(() {
+    //   ownProfile = (currentOnlineUserId == widget.userProfileId);
+    // });
+
     return FutureBuilder(
       future: usersReference.document(widget.userProfileId).get(),
       builder: (context, dataSnapshot) {
@@ -76,6 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
         User user = User.fromDocument(dataSnapshot.data);
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Card(
               elevation: 3,
@@ -87,41 +117,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       children: [
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                          padding: EdgeInsets.all(5),
                           decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
                             color: user.isVip
                                 ? Colors.yellow.shade900
-                                : Colors.white,
+                                : colorOffWhite,
                           ),
-                          child: CachedNetworkImage(
-                            imageUrl: user.url,
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) {
-                              return Shimmer.fromColors(
-                                child: Container(height: 80),
-                                baseColor: Colors.grey.shade300,
-                                highlightColor: Colors.grey.shade100,
-                                loop: 5,
-                              );
-                            },
-                            errorWidget: (context, url, error) => Container(
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 5),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                  ),
-                                  Text(
-                                    'Could not load Image...',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundImage:
+                                CachedNetworkImageProvider(user.url),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -148,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 5),
                               Visibility(
                                 visible: user.isVip ? true : false,
                                 child: Row(
@@ -173,44 +179,44 @@ class _ProfilePageState extends State<ProfilePage> {
                             ],
                           ),
                         ),
-                        ownProfile
-                            ? IconButton(
-                                onPressed: () => editUserProfile(),
-                                icon: FaIcon(
-                                  FontAwesomeIcons.edit,
-                                  color: colorBlack,
-                                ),
-                              )
-                            : Text(''),
+                        Visibility(
+                          visible: ownProfile ? true : false,
+                          child: IconButton(
+                            onPressed: () => editUserProfile(),
+                            icon: FaIcon(
+                              FontAwesomeIcons.edit,
+                              color: colorBlack,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    SizedBox(height: 10),
-                    user.bio.trim().length > 1
-                        ? Container(
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(top: 3),
-                            child: Text(
-                              user.bio,
-                              style: TextStyle(
-                                color: colorBlack,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Quicksand',
-                              ),
-                            ),
-                          )
-                        : Text(''),
-                    SizedBox(height: 10),
-                    ownProfile
-                        ? Text('')
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              createButton(),
-                            ],
+                    SizedBox(height: 5),
+                    Visibility(
+                      visible: user.bio.trim().length > 1 ? true : false,
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.only(top: 3),
+                        child: Text(
+                          user.bio,
+                          style: TextStyle(
+                            color: colorBlack,
+                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Quicksand',
                           ),
-                    SizedBox(height: 10),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        createButton(),
+                      ],
+                    ),
+                    SizedBox(height: 5),
                   ],
                 ),
               ),
@@ -269,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createButton() {
-    ownProfile = (currentOnlineUserId == widget.userProfileId);
+    ownProfile = (currentOnlineUserId == userProfileId);
     if (following && !ownProfile) {
       return createButtonTitleAndFunction(
         title: 'Unfollow',
@@ -311,8 +317,8 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            //EditProfilePage(currentOnlineUserId: currentOnlineUserId),
-            EditProfilePage(),
+            EditProfilePage(currentOnlineUserId: currentOnlineUserId),
+        //EditProfilePage(),
       ),
     );
   }
@@ -338,9 +344,10 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Text(
                 'No Posts',
                 style: TextStyle(
-                    color: colorBlack,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold),
+                  color: colorBlack,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -392,30 +399,33 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   createListAndGridPostOrientation() {
-    return Card(
-      elevation: 3,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          FlatButton.icon(
-              onPressed: () => setOrientation('grid'),
-              icon: Icon(
-                Icons.grid_on,
-                color: postOrientation == 'grid'
-                    ? Theme.of(context).primaryColor
-                    : colorGrey,
-              ),
-              label: Text('')),
-          FlatButton.icon(
-              onPressed: () => setOrientation('list'),
-              icon: Icon(
-                Icons.list,
-                color: postOrientation == 'list'
-                    ? Theme.of(context).primaryColor
-                    : colorGrey,
-              ),
-              label: Text('')),
-        ],
+    return Visibility(
+      visible: memoriesFlag ? false : true,
+      child: Card(
+        elevation: 3,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            FlatButton.icon(
+                onPressed: () => setOrientation('grid'),
+                icon: Icon(
+                  Icons.grid_on,
+                  color: postOrientation == 'grid'
+                      ? Theme.of(context).primaryColor
+                      : colorGrey,
+                ),
+                label: Text('')),
+            FlatButton.icon(
+                onPressed: () => setOrientation('list'),
+                icon: Icon(
+                  Icons.list,
+                  color: postOrientation == 'list'
+                      ? Theme.of(context).primaryColor
+                      : colorGrey,
+                ),
+                label: Text('')),
+          ],
+        ),
       ),
     );
   }
@@ -527,6 +537,195 @@ class _ProfilePageState extends State<ProfilePage> {
         .getDocuments();
     setState(() {
       countTotalFollowings = querySnapshot.documents.length;
+    });
+  }
+
+  createPostsMemoriesTab() {
+    return Container(
+      margin: EdgeInsets.only(left: 10),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                postsFlag = true;
+                memoriesFlag = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: postsFlag ? Colors.yellow.shade900 : colorWhite,
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Posts',
+                style: TextStyle(
+                  fontSize: postsFlag ? 18 : 15,
+                  fontWeight: postsFlag ? FontWeight.w600 : FontWeight.w300,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                postsFlag = false;
+                memoriesFlag = true;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: memoriesFlag ? Colors.yellow.shade900 : colorWhite,
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Memories',
+                style: TextStyle(
+                  fontSize: memoriesFlag ? 18 : 15,
+                  fontWeight: memoriesFlag ? FontWeight.w600 : FontWeight.w300,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  displayProfileMemories() {
+    if (loading) {
+      return linearProgress();
+    } else if (memoryProfileList.isEmpty) {
+      return Column(
+        children: [
+          Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Icon(
+                    Icons.photo_library,
+                    color: colorGrey,
+                    size: 200,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text(
+                    'No User',
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return CreateSubUser();
+                    }));
+                  },
+                  child: Icon(
+                    Icons.add,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      );
+    } else {
+      loading = false;
+
+      if (loading) {
+        loading = false;
+      }
+
+      return Column(
+        children: [
+          ListView.builder(
+            itemCount: memoryProfileList.length,
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return UserMemoryPage(
+                      currentUserId: currentOnlineUserId,
+                      subUserId: memoryProfileList[index].id,
+                      userName: memoryProfileList[index].username,
+                      imageUrl: memoryProfileList[index].url,
+                    );
+                  }));
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        radius: 30,
+                        backgroundImage: CachedNetworkImageProvider(
+                            memoryProfileList[index].url),
+                        backgroundColor: colorGrey,
+                      ),
+                      title: Text(memoryProfileList[index].username),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 20),
+          Visibility(
+            visible: memoryProfileList.length < 3 ? true : false,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return CreateSubUser();
+                }));
+              },
+              child: Icon(
+                Icons.add,
+                size: 30,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  getAllMemoryUsers() async {
+    QuerySnapshot querySnapshot = await memoryUserReference
+        .document(currentOnlineUserId)
+        .collection('memoryUsers')
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+
+    setState(() {
+      memoryProfileList = querySnapshot.documents
+          .map((documentSnapshot) =>
+              MemoryProfile.fromDocument(documentSnapshot))
+          .toList();
     });
   }
 }

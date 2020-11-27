@@ -2,6 +2,7 @@ import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/CreateMemory.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
+import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/widgets/HeaderWidget.dart';
 import 'package:beena_social_app/widgets/MemoryWidget.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
@@ -39,8 +40,9 @@ class _MemoryPageState extends State<MemoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: header(context, isAppTitle: true),
-      backgroundColor: colorWhite,
+      appBar: header(context,
+          isAppTitle: false, strTitle: 'Memories', hideBackButton: false),
+      backgroundColor: colorOffWhite,
       body: SafeArea(
         child: Stack(
           children: [
@@ -70,7 +72,12 @@ class _MemoryPageState extends State<MemoryPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return CreateMemory(googleCurrentUser: currentUser);
+            return ProfilePage(
+              userProfileId: currentUser.id,
+              postsFlag: false,
+              memoriesFlag: true,
+            );
+            //return null;
           }));
         },
         backgroundColor: colorBlack,
@@ -107,6 +114,8 @@ class _MemoryPageState extends State<MemoryPage> {
         .map((document) => Memory.fromDocument(document))
         .toList();
 
+    if (!mounted) return;
+
     setState(() {
       this.memoryPosts = allMemoryPosts;
       retrieveFollowings();
@@ -119,6 +128,7 @@ class _MemoryPageState extends State<MemoryPage> {
         .collection('userFollowing')
         .orderBy('timestamp', descending: true)
         .getDocuments();
+    if (!mounted) return;
     setState(() {
       followingsList = querySnapshot.documents
           .map((document) => document.documentID)

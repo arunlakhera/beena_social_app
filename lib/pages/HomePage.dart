@@ -6,9 +6,9 @@ import 'package:beena_social_app/pages/CreateAccountPage.dart';
 import 'package:beena_social_app/pages/MemoryPage.dart';
 import 'package:beena_social_app/pages/NotificationsPage.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
-import 'package:beena_social_app/pages/SearchPage.dart';
 import 'package:beena_social_app/pages/TimeLinePage.dart';
 import 'package:beena_social_app/pages/UploadPage.dart';
+import 'package:beena_social_app/utilities/AppColor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -23,10 +23,13 @@ final StorageReference storageReference =
     FirebaseStorage.instance.ref().child('Posts Pictures');
 final StorageReference memoryStorageReference =
     FirebaseStorage.instance.ref().child('Memory Pictures');
+final StorageReference memoryUserStorageReference =
+    FirebaseStorage.instance.ref().child('Memory User Pictures');
 final StorageReference recordingStorageReference =
     FirebaseStorage.instance.ref().child('Memory Recordings');
 final postsReference = Firestore.instance.collection('posts');
 final memoryReference = Firestore.instance.collection('memory');
+final memoryUserReference = Firestore.instance.collection('memoryUser');
 final activityFeedReference = Firestore.instance.collection('feed');
 final commentsReference = Firestore.instance.collection('comments');
 final memoryCommentsReference = Firestore.instance.collection('memoryComments');
@@ -36,6 +39,7 @@ final timelineReference = Firestore.instance.collection('timeline');
 
 final DateTime timeStamp = DateTime.now();
 User currentUser;
+bool isSignedIn = false;
 
 class HomePage extends StatefulWidget {
   @override
@@ -48,7 +52,12 @@ class _HomePageState extends State<HomePage> {
   PageController pageController;
   int getPageIndex = 0;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  bool isSignedIn = false;
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  String emailId = '';
+  String password;
+
   @override
   void initState() {
     super.initState();
@@ -87,19 +96,20 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
-        child: PageView(
-          children: [
-            TimeLinePage(googleCurrentUser: currentUser),
-            SearchPage(),
-            MemoryPage(googleCurrentUser: currentUser),
-            UploadPage(googleCurrentUser: currentUser),
-            NotificationsPage(),
-            ProfilePage(userProfileId: currentUser.id),
-          ],
-          controller: pageController,
-          onPageChanged: whenPageChanges,
-          physics: NeverScrollableScrollPhysics(),
-        ),
+        child: !isSignedIn
+            ? Container()
+            : PageView(
+                children: [
+                  TimeLinePage(googleCurrentUser: currentUser),
+                  MemoryPage(googleCurrentUser: currentUser),
+                  UploadPage(googleCurrentUser: currentUser),
+                  NotificationsPage(),
+                  ProfilePage(userProfileId: currentUser.id),
+                ],
+                controller: pageController,
+                onPageChanged: whenPageChanges,
+                physics: NeverScrollableScrollPhysics(),
+              ),
       ),
       bottomNavigationBar: CupertinoTabBar(
         currentIndex: getPageIndex,
@@ -108,12 +118,57 @@ class _HomePageState extends State<HomePage> {
         activeColor: colorBlack,
         inactiveColor: Colors.blueGrey,
         items: [
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.commentAlt)),
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.searchPlus)),
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.pagelines)),
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.cameraRetro)),
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.solidHeart)),
-          BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.addressCard)),
+          BottomNavigationBarItem(
+              icon: FaIcon(
+                FontAwesomeIcons.commentAlt,
+                size: 25,
+              ),
+              activeIcon: FaIcon(
+                FontAwesomeIcons.commentAlt,
+                size: 25,
+                color: Colors.green.shade600,
+              ),
+              title: Text('Posts')),
+          BottomNavigationBarItem(
+              icon: FaIcon(
+                FontAwesomeIcons.pagelines,
+                size: 25,
+              ),
+              activeIcon: FaIcon(
+                FontAwesomeIcons.pagelines,
+                size: 25,
+                color: Colors.green.shade600,
+              ),
+              title: Text('Memories')),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.cameraRetro),
+            activeIcon: FaIcon(
+              FontAwesomeIcons.cameraRetro,
+              color: Colors.green.shade600,
+            ),
+          ),
+          BottomNavigationBarItem(
+              icon: FaIcon(
+                FontAwesomeIcons.solidHeart,
+                size: 25,
+              ),
+              activeIcon: FaIcon(
+                FontAwesomeIcons.solidHeart,
+                size: 25,
+                color: Colors.green.shade600,
+              ),
+              title: Text('Notification')),
+          BottomNavigationBarItem(
+              icon: FaIcon(
+                FontAwesomeIcons.addressCard,
+                size: 25,
+              ),
+              activeIcon: FaIcon(
+                FontAwesomeIcons.addressCard,
+                size: 25,
+                color: Colors.green.shade600,
+              ),
+              title: Text('Profile')),
         ],
       ),
     );
@@ -121,79 +176,335 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildSignInScreen() {
     return Scaffold(
+      backgroundColor: AppColor.PageBgColorGrayGainsboro,
       body: SafeArea(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                //Colors.blue.shade100.withOpacity(0.8),
-                Color(0xFFf0f5fc),
-                Colors.yellow.shade200,
-                colorWhite,
-                Color(0xFFf0f5fc),
-                //Colors.deepPurple.withOpacity(0.2),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+        child: SingleChildScrollView (
+          child: Container(
+            height: MediaQuery.of(context).size.height > MediaQuery.of(context).size.width ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width,
+            margin: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 10,
+              bottom: 10,
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  child: Image.asset('assets/images/logo_3.png', width: 200, height: 100,),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Welcome to Beena',
+                    style: TextStyle(
+                      color: AppColor.PageBgColorBlackRich,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Sign in to continue',
+                    style: TextStyle(
+                      color: AppColor.PageBgColorGray,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 25),
+
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.all(5.0),
+                  child: TextField(
+                    controller: emailController,
+                    autocorrect: true,
+                    decoration: InputDecoration(
+                      hintText: 'Email Id..',
+                      prefixIcon: Icon(Icons.email),
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white54,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorGray, width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorDark, width: 2),
+                      ),
+                    ),
+                    onChanged: (value){
+                      setState(() {
+                        emailId = emailController.text;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(height: 5),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.all(5.0),
+                  child: TextField(
+                    controller: emailController,
+                    autocorrect: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password...',
+                      prefixIcon: Icon(Icons.remove_red_eye),
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white54,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorGray, width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorDark, width: 2),
+                      ),
+                    ),
+                    onChanged: (value){
+                      setState(() {
+                        emailId = emailController.text;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    margin: EdgeInsets.only(
+                      left: 10,
+                      right: 10,
+                    ),
                     child: Text(
-                      'Been-A-snap!',
+                      'Forgot Password?',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
-                        fontFamily: 'Signatra',
-                        letterSpacing: 3,
-                        wordSpacing: 3,
-                        shadows: [
-                          Shadow(
-                              offset: Offset(5, 5),
-                              color: Colors.black38,
-                              blurRadius: 6),
-                          Shadow(
-                            color: Colors.black.withOpacity(0.85),
-                          )
-                        ],
-                        color: Colors.black87,
-                        //color: Colors.grey.shade900,
+                        color: AppColor.PageBgColorDark,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
                       ),
                     ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    child: RaisedButton.icon(
-                      color: colorWhite,
-                      onPressed: () => googleLoginUser(),
-                      icon: FaIcon(
-                        FontAwesomeIcons.google,
-                        color: Colors.red.shade900,
-                        size: 25,
-                      ),
-                      label: Text('Sign In with Google'),
+                SizedBox(height: 15),
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                  ),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColor.PageBgColorSkyBlue,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    'Sign In',
+                    style: TextStyle(
+                      color: AppColor.PageBgColorLight,
+                      fontSize: 16,
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-            ],
+                ),
+                SizedBox(height: 15),
+                Container(
+                  margin: EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1.0,
+                          color: AppColor.PageBgColorGray,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'OR',
+                        style: TextStyle(
+                          color: AppColor.PageBgColorDark,
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          height: 1.0,
+                          color: AppColor.PageBgColorGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 15),
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColor.PageBgColorDark),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: FlatButton.icon(
+                    // minWidth: MediaQuery.of(context).size.width,
+                    // height: 50,
+                    //
+                    shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+                    focusColor: AppColor.PageBgColorRedRose,
+                    onPressed: (){
+                      googleLoginUser();
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.google,
+                      color: AppColor.PageBgColorRedCarmine,
+                    ),
+                    label: Text(
+                      'Sign in with Google',
+                      style: TextStyle(color: AppColor.PageBgColorBlackRich,),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColor.PageBgColorDark),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: FlatButton.icon(
+                    // minWidth: MediaQuery.of(context).size.width,
+                    // height: 50,
+                    shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+                    focusColor: AppColor.PageBgColorRedRose,
+                    onPressed: (){
+
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.facebookF,
+                      color: AppColor.PageBgColorSkyBlue,
+                    ),
+                    label: Text(
+                      'Sign in with Facebook',
+                      style: TextStyle(color: AppColor.PageBgColorBlackRich,),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                RichText(
+                  text: TextSpan(
+                      text: 'Dont have an account? ',
+                      style: TextStyle(color: AppColor.PageBgColorBlueCrayola),
+                      children: [
+                        TextSpan(
+                          text: 'Register',
+                          style: TextStyle(
+                            color: AppColor.PageBgColorSkyBlue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ]
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+  // Widget buildSignInScreen() {
+  //   return Scaffold(
+  //     body: SafeArea(
+  //       child: Container(
+  //         height: MediaQuery.of(context).size.height,
+  //         width: MediaQuery.of(context).size.width,
+  //         decoration: BoxDecoration(
+  //           gradient: LinearGradient(
+  //             colors: [
+  //               //Colors.blue.shade100.withOpacity(0.8),
+  //               Color(0xFFf0f5fc),
+  //               Colors.yellow.shade200,
+  //               colorWhite,
+  //               Color(0xFFf0f5fc),
+  //               //Colors.deepPurple.withOpacity(0.2),
+  //             ],
+  //             begin: Alignment.topCenter,
+  //             end: Alignment.bottomCenter,
+  //           ),
+  //         ),
+  //         child: Column(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             Expanded(
+  //               child: Center(
+  //                 child: Container(
+  //                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+  //                   child: Text(
+  //                     'Been-A-snap!',
+  //                     style: TextStyle(
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 60,
+  //                       fontFamily: 'Signatra',
+  //                       letterSpacing: 3,
+  //                       wordSpacing: 3,
+  //                       shadows: [
+  //                         Shadow(
+  //                             offset: Offset(5, 5),
+  //                             color: Colors.black38,
+  //                             blurRadius: 6),
+  //                         Shadow(
+  //                           color: Colors.black.withOpacity(0.85),
+  //                         )
+  //                       ],
+  //                       color: Colors.black87,
+  //                       //color: Colors.grey.shade900,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //             Row(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 Container(
+  //                   child: RaisedButton.icon(
+  //                     color: colorWhite,
+  //                     onPressed: () => googleLoginUser(),
+  //                     icon: FaIcon(
+  //                       FontAwesomeIcons.google,
+  //                       color: Colors.red.shade900,
+  //                       size: 25,
+  //                     ),
+  //                     label: Text('Sign In with Google'),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             SizedBox(height: 20),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   controlGoogleSignIn(GoogleSignInAccount signInAccount) async {
     if (signInAccount != null) {

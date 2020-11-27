@@ -7,16 +7,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditProfilePage extends StatefulWidget {
-  //final String currentOnlineUserId;
+  final String currentOnlineUserId;
 
-  //EditProfilePage({this.currentOnlineUserId});
+  EditProfilePage({this.currentOnlineUserId});
 
   @override
-  _EditProfilePageState createState() => _EditProfilePageState();
+  _EditProfilePageState createState() =>
+      _EditProfilePageState(currentOnlineUserId);
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  String currentOnlineUserId = currentUser?.id;
+  String currentOnlineUserId;
+
+  _EditProfilePageState(this.currentOnlineUserId); //= currentUser?.id;
+
   TextEditingController profileNameTextEditingController =
       TextEditingController();
   TextEditingController bioTextEditingController = TextEditingController();
@@ -34,14 +38,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colorWhite,
       key: _scaffoldGlobalKey,
       appBar: AppBar(
         backgroundColor: colorWhite,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorBlack, size: 30),
+          onPressed: () => Navigator.pop(context),
+        ),
         iconTheme: IconThemeData(color: colorBlack),
-        title: Text('Edit Profile', style: TextStyle(color: colorBlack)),
+        title: Text(
+          'Edit Profile',
+          style: TextStyle(
+            color: colorBlack,
+            fontFamily: 'Signatra',
+            fontSize: 30.0,
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.done, color: colorBlack, size: 30),
@@ -271,8 +291,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   logoutUser() async {
-    await googleSignIn.signOut();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
+    await googleSignIn.signOut().whenComplete(() {
+      isSignedIn = false;
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
+    });
   }
 }

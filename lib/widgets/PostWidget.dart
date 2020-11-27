@@ -3,13 +3,16 @@ import 'dart:async';
 import 'package:beena_social_app/constants.dart';
 import 'package:beena_social_app/models/user.dart';
 import 'package:beena_social_app/pages/CommentsPage.dart';
+import 'package:beena_social_app/pages/FullScreenImage.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
 import 'package:beena_social_app/widgets/ProgressWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 class Post extends StatefulWidget {
   final String postId;
@@ -19,6 +22,7 @@ class Post extends StatefulWidget {
   final String description;
   final String location;
   final String url;
+  final Timestamp timestamp;
 
   Post({
     this.postId,
@@ -28,6 +32,7 @@ class Post extends StatefulWidget {
     this.description,
     this.location,
     this.url,
+    this.timestamp,
   });
 
   factory Post.fromDocument(DocumentSnapshot documentSnapshot) {
@@ -39,6 +44,7 @@ class Post extends StatefulWidget {
       description: documentSnapshot['description'],
       location: documentSnapshot['location'],
       url: documentSnapshot['url'],
+      timestamp: documentSnapshot['timestamp'],
     );
   }
 
@@ -65,6 +71,7 @@ class Post extends StatefulWidget {
         description: this.description,
         location: this.location,
         url: this.url,
+        timestamp: this.timestamp,
         likeCount: getTotalNumberOfLikes(this.likes),
       );
 }
@@ -77,7 +84,9 @@ class _PostState extends State<Post> {
   final String description;
   final String location;
   final String url;
+  final Timestamp timestamp;
   int likeCount;
+  var countFormat = new NumberFormat.compact();
   bool isLiked;
   bool showHeart = false;
   final currentOnlineUserId = currentUser?.id;
@@ -92,6 +101,7 @@ class _PostState extends State<Post> {
     this.description,
     this.location,
     this.url,
+    this.timestamp,
     this.likeCount,
   });
 
@@ -129,7 +139,6 @@ class _PostState extends State<Post> {
           children: [
             createPostHead(),
             createPostPicture(),
-
             createPostFooter(),
             //Divider(color: Colors.grey.shade800, thickness: 1),
           ],
@@ -171,9 +180,19 @@ class _PostState extends State<Post> {
                             color: colorBlack, fontWeight: FontWeight.bold),
                       ),
                     ),
+                    Visibility(
+                      visible: location.length < 1 ? false : true,
+                      child: Text(
+                        location,
+                        style: TextStyle(
+                            color: Colors.grey.shade700, fontSize: 12),
+                      ),
+                    ),
                     Text(
-                      location,
-                      style: TextStyle(color: Colors.grey.shade700),
+                      timeAgo.format(timestamp.toDate()),
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(color: Colors.grey.shade700, fontSize: 12),
                     ),
                   ],
                 ),
@@ -205,6 +224,16 @@ class _PostState extends State<Post> {
   createPostPicture() {
     return GestureDetector(
       onDoubleTap: () => controlUserLikePost(),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return FullScreenImage(
+            screenType: 'post',
+            imageUrl: url,
+            imageUrl2: 'NA',
+            imageUrl3: 'NA',
+          );
+        }));
+      },
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -270,7 +299,7 @@ class _PostState extends State<Post> {
                       ),
                     ),
                     Text(
-                      '$likeCount likes',
+                      '${NumberFormat.compact().format(likeCount)} likes',
                       style: TextStyle(
                         color: colorBlack,
                         fontWeight: FontWeight.bold,
@@ -293,7 +322,7 @@ class _PostState extends State<Post> {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        '$commentCount comments',
+                        '${NumberFormat.compact().format(commentCount)} comments',
                         style: TextStyle(
                           color: colorBlack,
                           fontWeight: FontWeight.bold,

@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:beena_social_app/constants.dart';
+import 'package:beena_social_app/models/MemoryProfile.dart';
 import 'package:beena_social_app/models/user.dart';
+import 'package:beena_social_app/pages/FullScreenImage.dart';
 import 'package:beena_social_app/pages/HomePage.dart';
 import 'package:beena_social_app/pages/MemoryComments.dart';
 import 'package:beena_social_app/pages/ProfilePage.dart';
@@ -11,10 +13,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_pro/carousel_pro.dart';
+import 'package:marquee/marquee.dart';
+import 'package:intl/intl.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 class Memory extends StatefulWidget {
   final String memoryId;
   final String ownerId;
+  final String subUserId;
   final dynamic likes;
   final String username;
   final String description;
@@ -23,24 +29,27 @@ class Memory extends StatefulWidget {
   final String urlImage2;
   final String urlImage3;
   final String urlRecording;
+  final Timestamp timestamp;
 
-  Memory({
-    this.memoryId,
-    this.ownerId,
-    this.likes,
-    this.username,
-    this.description,
-    this.location,
-    this.urlImage1,
-    this.urlImage2,
-    this.urlImage3,
-    this.urlRecording,
-  });
+  Memory(
+      {this.memoryId,
+      this.ownerId,
+      this.subUserId,
+      this.likes,
+      this.username,
+      this.description,
+      this.location,
+      this.urlImage1,
+      this.urlImage2,
+      this.urlImage3,
+      this.urlRecording,
+      this.timestamp});
 
   factory Memory.fromDocument(DocumentSnapshot documentSnapshot) {
     return Memory(
       memoryId: documentSnapshot['memoryId'],
-      ownerId: documentSnapshot['ownerId'],
+      ownerId: documentSnapshot['userId'],
+      subUserId: documentSnapshot['subUserId'],
       likes: documentSnapshot['likes'],
       username: documentSnapshot['username'],
       description: documentSnapshot['description'],
@@ -49,6 +58,7 @@ class Memory extends StatefulWidget {
       urlImage2: documentSnapshot['urlImage2'],
       urlImage3: documentSnapshot['urlImage3'],
       urlRecording: documentSnapshot['urlRecording'],
+      timestamp: documentSnapshot['timestamp'],
     );
   }
 
@@ -70,6 +80,7 @@ class Memory extends StatefulWidget {
   _MemoryState createState() => _MemoryState(
         memoryId: this.memoryId,
         ownerId: this.ownerId,
+        subUserId: this.subUserId,
         likes: this.likes,
         username: this.username,
         description: this.description,
@@ -79,12 +90,14 @@ class Memory extends StatefulWidget {
         urlImage3: this.urlImage3,
         urlRecording: this.urlRecording,
         likeCount: getTotalNumberOfLikes(this.likes),
+        timestamp: this.timestamp,
       );
 }
 
 class _MemoryState extends State<Memory> {
   final String memoryId;
   final String ownerId;
+  final String subUserId;
   Map likes;
   final String username;
   final String description;
@@ -93,6 +106,7 @@ class _MemoryState extends State<Memory> {
   final String urlImage2;
   final String urlImage3;
   final String urlRecording;
+  final Timestamp timestamp;
 
   int likeCount;
   bool isLiked;
@@ -107,6 +121,7 @@ class _MemoryState extends State<Memory> {
   _MemoryState({
     this.memoryId,
     this.ownerId,
+    this.subUserId,
     this.likes,
     this.username,
     this.description,
@@ -116,6 +131,7 @@ class _MemoryState extends State<Memory> {
     this.urlImage3,
     this.urlRecording,
     this.likeCount,
+    this.timestamp,
   });
 
   @override
@@ -127,6 +143,9 @@ class _MemoryState extends State<Memory> {
       });
     });
     countMemoryPostComments();
+
+    //retrieveComments();
+
     super.initState();
   }
 
@@ -152,8 +171,8 @@ class _MemoryState extends State<Memory> {
           children: [
             createMemoryPostHead(),
             createMemoryPostPicture(),
+            retrieveComments(),
             createMemoryPostFooter(),
-            //Divider(color: Colors.grey.shade800, thickness: 1),
           ],
         ),
       ),
@@ -163,11 +182,13 @@ class _MemoryState extends State<Memory> {
   createMemoryPostHead() {
     return FutureBuilder(
       future: usersReference.document(ownerId).get(),
+      //future: memoryUserReference.document(ownerId).get(),
       builder: (context, dataSnapshot) {
         if (!dataSnapshot.hasData) {
           return linearProgress();
         }
         User user = User.fromDocument(dataSnapshot.data);
+        //MemoryProfile memoryUser = MemoryProfile.fromDocument(dataSnapshot.data);
         bool isPostOwner = (currentOnlineUserId == ownerId);
         return Container(
           color: colorWhite,
@@ -177,6 +198,7 @@ class _MemoryState extends State<Memory> {
             children: [
               CircleAvatar(
                 backgroundImage: CachedNetworkImageProvider(user.url),
+                //backgroundImage: CachedNetworkImageProvider(currentUser.url),
                 backgroundColor: colorGrey,
               ),
               SizedBox(width: 10),
@@ -188,6 +210,7 @@ class _MemoryState extends State<Memory> {
                       onTap: () =>
                           displayUserProfile(context, userProfileId: user.id),
                       child: Text(
+                        //currentUser.username,
                         user.username,
                         style: TextStyle(
                             color: colorBlack, fontWeight: FontWeight.bold),
@@ -196,6 +219,12 @@ class _MemoryState extends State<Memory> {
                     Text(
                       location,
                       style: TextStyle(color: Colors.grey.shade700),
+                    ),
+                    Text(
+                      timeAgo.format(timestamp.toDate()),
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(color: Colors.grey.shade700, fontSize: 12),
                     ),
                   ],
                 ),
@@ -227,6 +256,16 @@ class _MemoryState extends State<Memory> {
   createMemoryPostPicture() {
     return GestureDetector(
       onDoubleTap: () => controlUserLikePost(),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return FullScreenImage(
+            screenType: 'memories',
+            imageUrl: urlImage1,
+            imageUrl2: urlImage2,
+            imageUrl3: urlImage3,
+          );
+        }));
+      },
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -239,9 +278,20 @@ class _MemoryState extends State<Memory> {
               height: 300.0,
               child: Carousel(
                 images: [
-                  NetworkImage(urlImage1),
-                  if (urlImage2 != 'NA') NetworkImage(urlImage2),
-                  if (urlImage3 != 'NA') NetworkImage(urlImage3),
+                  CachedNetworkImage(
+                    imageUrl: urlImage1,
+                    fit: BoxFit.fill,
+                  ),
+                  if (urlImage2 != 'NA')
+                    CachedNetworkImage(
+                      imageUrl: urlImage2,
+                      fit: BoxFit.fill,
+                    ),
+                  if (urlImage3 != 'NA')
+                    CachedNetworkImage(
+                      imageUrl: urlImage3,
+                      fit: BoxFit.fill,
+                    ),
                 ],
                 dotSize: 4.0,
                 dotSpacing: 15.0,
@@ -428,6 +478,8 @@ class _MemoryState extends State<Memory> {
     if (_liked) {
       memoryReference
           .document(ownerId)
+          .collection('users')
+          .document(subUserId)
           .collection('usersMemory')
           .document(memoryId)
           .updateData({'likes.$currentOnlineUserId': false});
@@ -440,6 +492,8 @@ class _MemoryState extends State<Memory> {
     } else if (!_liked) {
       memoryReference
           .document(ownerId)
+          .collection('users')
+          .document(subUserId)
           .collection('usersMemory')
           .document(memoryId)
           .updateData({'likes.$currentOnlineUserId': true});
@@ -500,9 +554,9 @@ class _MemoryState extends State<Memory> {
       {String memoryId, String ownerId, String url}) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return MemoryComments(
-        memoryId: memoryId,
-        memoryOwnerId: ownerId,
-        memoryImageUrl: url,
+        memoryCommentId: memoryId,
+        memoryCommentOwnerId: ownerId,
+        memoryCommentImageUrl: url,
       );
     }));
   }
@@ -608,22 +662,6 @@ class _MemoryState extends State<Memory> {
         });
       });
     }
-
-//    if (recordFilePath != null && File(recordFilePath).existsSync()) {
-//      AudioPlayer audioPlayer = AudioPlayer();
-//      audioPlayer.play(recordFilePath, isLocal: true);
-//      statusText = 'Playing...';
-//      isPlaying = true;
-
-//
-
-//
-//      audioPlayer.onDurationChanged.listen((Duration d) {
-//        setState(() {
-//          currentRecordingDuration = '$currentDuration s';
-//        });
-//      });
-//    }
   }
 
   void stop() {
@@ -631,5 +669,55 @@ class _MemoryState extends State<Memory> {
       audioPlayer.stop();
       isPlaying = false;
     }
+  }
+
+  retrieveComments() {
+    return StreamBuilder(
+      stream: memoryCommentsReference
+          .document(memoryId)
+          .collection('comments')
+          .orderBy('timestamp', descending: false)
+          .snapshots(),
+      builder: (context, dataSnapshot) {
+        if (!dataSnapshot.hasData) {
+          return circularProgress();
+        }
+
+        String userData = "";
+        dataSnapshot.data.documents.forEach((document) {
+          var commentUserId = document['userId'];
+
+          if (commentUserId != currentUser.id) {
+            userData = '' +
+                userData +
+                document['username'] +
+                ': ' +
+                document['comment'] +
+                '   ';
+          }
+        });
+
+        return userData.length == 0
+            ? Container()
+            : Container(
+                padding: EdgeInsets.symmetric(horizontal: 3),
+                height: 20,
+                child: Marquee(
+                  text: userData,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      fontFamily: 'Quicksand',
+                      color: colorBlack),
+                  scrollAxis: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  blankSpace: 10.0,
+                  velocity: 90.0,
+                  startPadding: 10.0,
+                  accelerationCurve: Curves.linear,
+                ),
+              );
+      },
+    );
   }
 }

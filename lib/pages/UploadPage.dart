@@ -134,6 +134,8 @@ class _UploadPageState extends State<UploadPage>
     Navigator.pop(context);
     final pickedFile = await picker.getImage(
       source: ImageSource.gallery,
+      maxWidth: 680,
+      maxHeight: 970,
     );
     setState(() {
       this.image = File(pickedFile.path);
@@ -156,8 +158,8 @@ class _UploadPageState extends State<UploadPage>
           'New Post',
           style: TextStyle(
             color: colorBlack,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontFamily: 'Signatra',
+            fontSize: 30.0,
           ),
         ),
         actions: [
@@ -178,7 +180,7 @@ class _UploadPageState extends State<UploadPage>
         children: [
           uploading ? linearProgress() : Text(''),
           Container(
-            height: 230,
+            height: 220,
             width: MediaQuery.of(context).size.width,
             child: Center(
               child: AspectRatio(
@@ -312,8 +314,11 @@ class _UploadPageState extends State<UploadPage>
     final tDirectory = await getTemporaryDirectory();
     final path = tDirectory.path;
     ImgDir.Image mImageFile = ImgDir.decodeImage(image.readAsBytesSync());
-    final compressedImageFile = File('$path/img_$postId.jpg')
-      ..writeAsBytesSync(ImgDir.encodeJpg(mImageFile, quality: 60));
+
+    final compressedImageFile = File('$path/img_$postId.jpg');
+
+    compressedImageFile
+        .writeAsBytesSync(ImgDir.encodeJpg(mImageFile, quality: 60));
     setState(() {
       image = compressedImageFile;
     });

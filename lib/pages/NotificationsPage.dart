@@ -8,6 +8,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+String notificationItemText;
+Widget mediaPreview;
+
 class NotificationsPage extends StatefulWidget {
   @override
   _NotificationsPageState createState() => _NotificationsPageState();
@@ -71,9 +74,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return notificationsItems;
   }
 }
-
-String notificationItemText;
-Widget mediaPreview;
 
 class NotificationsItem extends StatelessWidget {
   final String username;

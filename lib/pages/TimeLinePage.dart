@@ -25,8 +25,6 @@ class _TimeLinePageState extends State<TimeLinePage> {
   final int increment = 3;
   bool isLoading = false;
 
-  ScrollController scrollController;
-
   @override
   void initState() {
     super.initState();
@@ -39,7 +37,8 @@ class _TimeLinePageState extends State<TimeLinePage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: colorWhite,
-      appBar: header(context, isAppTitle: true),
+      appBar: header(context,
+          isAppTitle: false, strTitle: 'Posts', hideBackButton: false),
       body: SafeArea(
         child: Stack(
           children: [
@@ -92,6 +91,7 @@ class _TimeLinePageState extends State<TimeLinePage> {
         .collection('userFollowing')
         .orderBy('timestamp', descending: true)
         .getDocuments();
+    if (!mounted) return;
     setState(() {
       followingsList = querySnapshot.documents
           .map((document) => document.documentID)
