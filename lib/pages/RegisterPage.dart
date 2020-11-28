@@ -16,10 +16,10 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
-  String fullName ='';
-  String emailId ='';
-  String password ='';
-  String confirmPassword ='';
+  String fullName;
+  String emailId;
+  String password;
+  String confirmPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -256,18 +256,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void registerUser() {
 
-    if(fullName == null){
+    if(fullName == null || fullName.isEmpty){
       print('Full Name not provided');
-    }else if(emailId == null){
+    }else if(emailId == null || emailId.isEmpty){
       print('Email Id not provided');
-    }else if(password == null){
+    }else if(password == null || password.isEmpty){
       print('Password not provided');
-    }else if(confirmPassword == null){
+    }else if(confirmPassword == null || confirmPassword.isEmpty){
       print('Confirm Password not provided');
     }else if(password != confirmPassword){
       print('Password and Confirm Password does not match');
     }else{
       // Continue Sign up
+      print('Sign Up');
     }
   }
 }
