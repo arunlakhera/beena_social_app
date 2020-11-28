@@ -14,10 +14,12 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController fullNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
 
-  String fullName = '';
-  String emailId = '';
-  String password;
+  String fullName ='';
+  String emailId ='';
+  String password ='';
+  String confirmPassword ='';
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +96,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     onChanged: (value){
                       setState(() {
-                        emailId = emailController.text;
+                        fullName = fullNameController.text;
                       });
                     },
                   ),
@@ -134,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: MediaQuery.of(context).size.width,
                   padding: EdgeInsets.all(5.0),
                   child: TextField(
-                    controller: emailController,
+                    controller: passwordController,
                     autocorrect: true,
                     decoration: InputDecoration(
                       hintText: 'Password...',
@@ -153,29 +155,63 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     onChanged: (value){
                       setState(() {
-                        emailId = emailController.text;
+                        password = passwordController.text;
                       });
                     },
                   ),
                 ),
                 SizedBox(height: 10),
                 Container(
-                  height: 50,
                   width: MediaQuery.of(context).size.width,
-                  margin: EdgeInsets.only(
-                    left: 10,
-                    right: 10,
+                  padding: EdgeInsets.all(5.0),
+                  child: TextField(
+                    controller: confirmPasswordController,
+                    autocorrect: true,
+                    decoration: InputDecoration(
+                      hintText: 'Confirm Password...',
+                      prefixIcon: Icon(Icons.remove_red_eye),
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white54,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorGray, width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(color: AppColor.PageBgColorDark, width: 2),
+                      ),
+                    ),
+                    onChanged: (value){
+                      setState(() {
+                        confirmPassword = confirmPasswordController.text;
+                      });
+                    },
                   ),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColor.PageBgColorSkyBlue,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: AppColor.PageBgColorLight,
-                      fontSize: 16,
+                ),
+                SizedBox(height: 10),
+                GestureDetector(
+                  onTap: (){
+                    registerUser();
+                  },
+                  child: Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.only(
+                      left: 10,
+                      right: 10,
+                    ),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColor.PageBgColorSkyBlue,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      'Register',
+                      style: TextStyle(
+                        color: AppColor.PageBgColorLight,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -216,6 +252,23 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
+  }
+
+  void registerUser() {
+
+    if(fullName == null){
+      print('Full Name not provided');
+    }else if(emailId == null){
+      print('Email Id not provided');
+    }else if(password == null){
+      print('Password not provided');
+    }else if(confirmPassword == null){
+      print('Confirm Password not provided');
+    }else if(password != confirmPassword){
+      print('Password and Confirm Password does not match');
+    }else{
+      // Continue Sign up
+    }
   }
 }
 

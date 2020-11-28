@@ -273,7 +273,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     onChanged: (value){
                       setState(() {
-                        emailId = emailController.text;
+                        password = passwordController.text;
                       });
                     },
                   ),
