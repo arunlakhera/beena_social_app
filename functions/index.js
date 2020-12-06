@@ -11,7 +11,6 @@ exports.onCreateActivityFeedItem = functions.firestore
     const userRef = admin.firestore().doc(`users/${userId}`);
     const doc = await userRef.get();
 
-
     const androidNotificationToken = doc.data().androidNotificationToken;
     const createActivityFeedItem = snapshot.data();
 

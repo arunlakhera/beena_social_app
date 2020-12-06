@@ -8,9 +8,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TimeLinePage extends StatefulWidget {
-  final User googleCurrentUser;
+  final User currentUser;
 
-  TimeLinePage({this.googleCurrentUser});
+  TimeLinePage({this.currentUser});
 
   @override
   _TimeLinePageState createState() => _TimeLinePageState();
@@ -70,7 +70,7 @@ class _TimeLinePageState extends State<TimeLinePage> {
 
   retrieveTimeLine() async {
     QuerySnapshot querySnapshot = await timelineReference
-        .document(widget.googleCurrentUser.id)
+        .document(widget.currentUser.id)
         .collection('timelinePosts')
         .orderBy('timestamp', descending: true)
         .getDocuments();

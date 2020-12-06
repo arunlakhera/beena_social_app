@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="Been-A-Snap"
+        android:label="Beena"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

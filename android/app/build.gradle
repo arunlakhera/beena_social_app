@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // TODO: Specify your ow n unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.arunlakhera.beena_social_app"
         minSdkVersion 26
         targetSdkVersion 28

@@ -30,7 +30,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             right: 0,
             bottom: 30,
             child: Text(
-              'Been-a-Snap!',
+              'Beena',
               style: TextStyle(
                 fontSize: 50,
                 fontWeight: FontWeight.bold,
